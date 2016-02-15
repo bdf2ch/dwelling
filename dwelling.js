@@ -499,7 +499,8 @@ var dwellingModule = angular.module("dwelling", [])
         $provide.service("$dwelling", ["$log", "$http", function ($log, $http) {
             var service = {};
 
-            var container = document.getElementById("dwelling-svg");
+            var container = document.getElementById("dwelling");
+            var svgContainer = document.getElementById("dwelling-svg");
             var complex = undefined;
             var queues = [];
 
@@ -519,7 +520,7 @@ var dwellingModule = angular.module("dwelling", [])
                             this[param] = parameters[param];
                     }
                     if (this.img !== undefined && this.img !== "") {
-                        container.style.backgroundImage = "url('" + this.img + "')";
+                        svgContainer.style.backgroundImage = "url('" + this.img + "')";
                     }
                 }
 
@@ -531,6 +532,7 @@ var dwellingModule = angular.module("dwelling", [])
                         if (parameters !== undefined) {
                             var queue = new Queue(parameters);
                             queues.push(queue);
+                            return queue;
                         }
                     }
                 };
@@ -544,14 +546,27 @@ var dwellingModule = angular.module("dwelling", [])
              * @constructor
              */
             function Queue (parameters) {
+                this.number = 0;
                 this.img = "";
                 this.geometry = [];
+
+                var selected = false;
 
                 if (parameters !== undefined) {
                     for (var param in parameters) {
                         if (this.hasOwnProperty(param))
                             this[param] = parameters[param];
                     }
+                }
+
+                this.select = function (flag) {
+                    if (flag !== undefined && glag.constructor === Boolean) {
+                        selected = flag;
+                        return selected;
+                    }
+                };
+
+                this.drawGeometry = function () {
                     if (this.geometry.constructor === Array && this.geometry.length > 0) {
                         var length = this.geometry.length;
                         var points = "";
@@ -561,15 +576,15 @@ var dwellingModule = angular.module("dwelling", [])
                         }
                         var polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
                         polyline.setAttribute('points', points);
-                        container.
-                        container.appendChild(polyline);
+                        svgContainer.appendChild(polyline);
+                        return this;
                     }
-                }
+                };
 
-                this.draw = function () {
-                    if (geometry.length > 0) {
-
-                    }
+                this.drawNumberMarker = function () {
+                    var marker = document.createElement("div");
+                    marker.className = "svg-queue-marker";
+                    svgContainer.appendChild(marker);
                 };
             };
 
@@ -627,11 +642,11 @@ var dwellingModule = angular.module("dwelling", [])
         });
         $dwelling.complex.get().queues.add({
             geometry: [[100, 100], [50, 300], [350, 300], [400, 100]]
-        });
+        }).drawGeometry().drawNumberMarker();
 
         $dwelling.complex.get().queues.add({
             geometry: [[500, 300], [500, 400], [800, 400], [800, 300]]
-        });
+        }).drawGeometry();
 
         $log.log("complex = ", $dwelling.complex.get());
     });
