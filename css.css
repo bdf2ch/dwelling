@@ -1,0 +1,37 @@
+#dwelling .dwelling-marker {
+  position: relative;
+  float: left;
+  z-index: 5;
+  font-family: Tahoma, Geneva, sans-serif;
+  text-align: center;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+#dwelling .dwelling-marker.queue {
+  background: url('img/sprite.png') no-repeat -684px -168px;
+  width: 53px;
+  height: 82px;
+}
+#dwelling .dwelling-marker.queue:hover {
+  background: url('img/sprite.png') no-repeat -684px -84px;
+  width: 53px;
+  height: 81px;
+}
+#dwelling .dwelling-marker.flats {
+  background: url('img/sprite.png') no-repeat -557px -139px;
+  width: 74px;
+  height: 73px;
+  padding-top: 8px;
+}
+#dwelling .dwelling-marker .marker-caption {
+  display: block;
+  font-size: 35px;
+  letter-spacing: 0px;
+  color: white;
+}
+#dwelling .dwelling-marker .marker-title {
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  color: white;
+}
