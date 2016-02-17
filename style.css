@@ -4,17 +4,41 @@ html, body {
 }
 
 #dwelling {
-    width: 1000px;
-    height: 500px;
-    //border: 1px solid black;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    //height: 100%;
+    overflow: auto;
+    //border: 1px solid red;
 
 }
 
+#dwelling img {
+    position: absolute;
+    height: 100%;
+    //min-height: 780px;
+    width: 100%;
+    //min-width: 1250px;
+    top: 0;
+    left: 0;
+    //border: 1px solid blue;
+}
+
 #dwelling #dwelling-svg {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
     width: 100%;
     height: 100%;
+    z-index: 2;
     background-position: left top;
-    background-size: cover;
+    background-size: 100%;
+    background-origin: padding-box;
+    background-repeat: no-repeat;
 }
 
 
@@ -28,7 +52,7 @@ html, body {
 #dwelling #dwelling-svg polyline:hover {
     //stroke: green;
     //cursor: pointer;
-    fill: red;
+    fill: rgba(245, 196, 61, 0.5);
 }
 
 .svg-queue-marker {
@@ -36,4 +60,9 @@ html, body {
     width: 150px;
     height: 150px;
     border: 3px solid orangered;
+}
+
+
+#dwelling .dwelling-marker {
+
 }

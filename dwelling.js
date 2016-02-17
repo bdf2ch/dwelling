@@ -496,13 +496,91 @@ function Flat () {
 
 var dwellingModule = angular.module("dwelling", [])
     .config(function ($provide) {
-        $provide.service("$dwelling", ["$log", "$http", function ($log, $http) {
+        $provide.service("$dwelling", ["$log", "$http", "$window", function ($log, $http, $window) {
             var service = {};
 
             var container = document.getElementById("dwelling");
             var svgContainer = document.getElementById("dwelling-svg");
             var complex = undefined;
             var queues = [];
+            var markers = [];
+
+
+
+            /**
+             * Класс, описывающий маркер на карте
+             * @param parameters {Object} - параметры инициализации объекта
+             * @constructor
+             */
+            function Marker (parameters) {
+                this.id = "";
+                this.x = 0;
+                this.y = 0;
+                this.caption = "";
+                this.title = "";
+                this.class = "";
+                var visible = true;
+                this.xPosition = "0px";
+                this.yPosition = "0px";
+                this.queueId = "";
+
+
+                if (parameters !== undefined) {
+                    for (var param in parameters) {
+                        if (this.hasOwnProperty(param))
+                            this[param] = parameters[param];
+                    }
+                    var width = container.clientWidth;
+                    var height = container.clientHeight;
+                    this.xPosition = ((width / 100) * this.x) + "px";
+                    this.yPosition = ((height / 100) * this.y) + "px";
+                }
+
+                this.isVisible = function () {
+                    return visible;
+                };
+
+                this.show = function () {
+                    visible = true;
+                };
+
+                this.hide = function () {
+                    visible = false;
+                };
+
+                this.getX = function () {
+                    return this.xPosition;
+                };
+
+                this.getY = function () {
+                    return this.yPosition;
+                };
+            };
+
+
+            service.markers = {
+                items: [],
+                get: function () {
+                    return service.markers.items;
+                },
+                add: function (parameters) {
+                    if (parameters !== undefined) {
+                        var marker = new Marker(parameters);
+                        service.markers.items.push(marker);
+                        return marker;
+                    }
+                },
+                hide: function (markerId) {
+                    var markersLength = markers.length;
+                    for (var i = 0; i < markersLength; i++) {
+                        if (markerId !== undefined && markers[i].id === markerId)
+                            markers[i].hide();
+                        else
+                            markers[i].hide();
+                    }
+                }
+            };
+
 
 
             /**
@@ -520,7 +598,7 @@ var dwellingModule = angular.module("dwelling", [])
                             this[param] = parameters[param];
                     }
                     if (this.img !== undefined && this.img !== "") {
-                        svgContainer.style.backgroundImage = "url('" + this.img + "')";
+                        //svgContainer.style.backgroundImage = "url('" + this.img + "')";
                     }
                 }
 
@@ -550,6 +628,7 @@ var dwellingModule = angular.module("dwelling", [])
                 this.img = "";
                 this.geometry = [];
 
+                var element = undefined;
                 var selected = false;
 
                 if (parameters !== undefined) {
@@ -566,27 +645,70 @@ var dwellingModule = angular.module("dwelling", [])
                     }
                 };
 
-                this.drawGeometry = function () {
+                this.draw = function () {
+                    var width = container.clientWidth;
+                    var height = container.clientHeight;
+                    var scrollHeight = container.scrollHeight;
+                    var scrollWidth = container.scrollWidth;
+                    var scrollTop = container.scrollTop;
+                    var scrollLeft = container.scrollLeft;
+                    //$log.log("clientWidth = ", svgWidth, ", clientHeight = ", svgHeight);
+                    //$log.log("scrollHeight = ", scrollHeight);
+                    //$log.log("scrollTop = ", scrollTop);
+                    $log.log("container = ", angular.element(container));
                     if (this.geometry.constructor === Array && this.geometry.length > 0) {
-                        var length = this.geometry.length;
                         var points = "";
+                        var length = this.geometry.length;
                         for (var i = 0; i < length; i++) {
-                            var points = points +  this.geometry[i][0] + "," + this.geometry[i][1];
+                            //var proportionX = 1920 / svgWidth;
+                            //var proportionY = 1080 / svgHeight;
+                            //var offsetX = (1920 - svgWidth) / proportionX;
+                            //var proportion = svgWidth / svgHeight;
+                            //$log.log("proportionX = ", proportionX);
+                            //$log.log("proportionY = ", proportionY);
+
+                            var x = (((width / 100) * this.geometry[i][0]));
+                            var y = (((height / 100) * this.geometry[i][1]));
+                            //var y = ((scrollHeight / 100)  * this.geometry[i][1]);
+                            $log.log("x = ", x, ", y = ", y);
+                            var points = points +  x + "," + y;
                             points = (i < length - 1) ? points + "," : points;
                         }
-                        var polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-                        polyline.setAttribute('points', points);
-                        svgContainer.appendChild(polyline);
+                        if (element !== undefined) {
+                            element.setAttribute('points', points);
+                        } else {
+                            var polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+                            polyline.id = "queue-" + this.number;
+                            polyline.setAttribute('points', points);
+                            svgContainer.appendChild(polyline);
+                            element = polyline;
+                        }
                         return this;
                     }
                 };
 
-                this.drawNumberMarker = function () {
-                    var marker = document.createElement("div");
-                    marker.className = "svg-queue-marker";
-                    svgContainer.appendChild(marker);
-                };
             };
+
+
+
+
+            angular.element($window).on("resize", function () {
+                $log.log("resized");
+                var length = complex.queues.get().length;
+                $log.log("length = ", length);
+                for (var i = 0; i < length; i ++) {
+                    complex.queues.get()[i].draw();
+                }
+
+                /*
+                var markers_length = service.markers.items.length;
+                for (var x = 0; x < markers_length; x++) {
+                    $log.log("xpos = ", service.markers.items[x].xPosition, ", ypos = ", service.markers.items[x].yPosition);
+                    service.markers.items[x].redraw();
+                    $log.log(service.markers.items[x]);
+                }
+                */
+            });
 
 
 
@@ -640,16 +762,123 @@ var dwellingModule = angular.module("dwelling", [])
         $dwelling.complex.set({
             img: "img/complex.jpg"
         });
-        $dwelling.complex.get().queues.add({
-            geometry: [[100, 100], [50, 300], [350, 300], [400, 100]]
-        }).drawGeometry().drawNumberMarker();
+        //$dwelling.complex.get().queues.add({
+        //    geometry: [[328, 197], [195, 260], [196, 273], [303, 307], [426, 227], [426, 218]]
+        //}).draw().drawNumberMarker();
 
         $dwelling.complex.get().queues.add({
-            geometry: [[500, 300], [500, 400], [800, 400], [800, 300]]
-        }).drawGeometry();
+            geometry: [[32.9, 34.9], [19.6, 46.4], [19.7, 48.6], [30.4, 54.6], [42.8, 40.2], [42.8, 38.5]]
+        }).draw();
+
+        $dwelling.markers.add({
+            id: "testmarker",
+            x: 28,
+            y: 32,
+            class: "queue",
+            caption: "1",
+            title: "очередь"
+        });
+
+        $dwelling.markers.add({
+            id: "testmarker2",
+            x: 29,
+            y: 31,
+            class: "flats",
+            caption: "28",
+            title: "квартир",
+            queueId: "testmarker"
+        }).hide();
+
+        //$dwelling.markers.hide("testmarker2");
 
         $log.log("complex = ", $dwelling.complex.get());
     });
 
 
 var dwellingApp = angular.module("dwellingApp", ["dwelling"]);
+
+
+
+
+dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", "$window", function ($log, $scope, $dwelling, $window) {
+    $scope.dwelling = $dwelling;
+    $scope.currentQueue = undefined;
+
+    $scope.redrawMarkers = function () {
+        var container = document.getElementById("dwelling");
+        var width = container.clientWidth;
+        var height = container.clientHeight;
+        var markersLength = $dwelling.markers.items.length;
+        for (var i = 0; i < markersLength; i++) {
+            $dwelling.markers.items[i].xPosition = (width / 100) * $dwelling.markers.items[i].x + "px";
+            $dwelling.markers.items[i].yPosition = (height / 100) * $dwelling.markers.items[i].y + "px";
+        }
+
+    };
+
+    $scope.selectMarker = function (markerId) {
+        if (markerId !== undefined) {
+            var markersLength = $dwelling.markers.get().length;
+            for (var i = 0; i < markersLength; i++) {
+                if ($dwelling.markers.get()[i].id === markerId) {
+                    if ($dwelling.markers.get()[i].class === "queue") {
+                        $scope.currentQueue = $dwelling.markers.get()[i];
+                        $log.log("current queue = ", $scope.currentQueue);
+                        /*
+                        for (var x = 0; x < markersLength; x++) {
+                            if ($dwelling.markers.get()[x].queueId !== undefined && $dwelling.markers.get()[x].queueId !== "" && $dwelling.markers.get()[x].queueId === markerId) {
+                                $dwelling.markers.get()[x].show();
+                            }
+                        }
+                        */
+                    }
+                }
+            }
+        }
+    };
+
+    $scope.markerMouseIn = function (markerId) {
+        if (markerId !== undefined) {
+            var markersLength = $dwelling.markers.get().length;
+            for (var i = 0; i < markersLength; i++) {
+                if ($dwelling.markers.get()[i].id === markerId) {
+                    if ($dwelling.markers.get()[i].class === "queue") {
+                        $scope.currentQueue = $dwelling.markers.get()[i];
+                        $log.log("current queue = ", $scope.currentQueue);
+                        for (var x = 0; x < markersLength; x++) {
+                            if ($dwelling.markers.get()[x].queueId !== undefined && $dwelling.markers.get()[x].queueId !== "" && $dwelling.markers.get()[x].queueId === markerId) {
+                                $dwelling.markers.get()[x].show();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+
+    $scope.markerMouseOut = function (markerId) {
+        if (markerId !== undefined) {
+            var markersLength = $dwelling.markers.get().length;
+            for (var i = 0; i < markersLength; i++) {
+                if ($dwelling.markers.get()[i].id === markerId) {
+                    if ($dwelling.markers.get()[i].class === "queue") {
+                        $scope.currentQueue = $dwelling.markers.get()[i];
+                        $log.log("current queue = ", $scope.currentQueue);
+                        for (var x = 0; x < markersLength; x++) {
+                            if ($dwelling.markers.get()[x].queueId !== undefined && $dwelling.markers.get()[x].queueId !== "" && $dwelling.markers.get()[x].queueId === markerId) {
+                                $dwelling.markers.get()[x].hide();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    angular.element($window).on("resize", function () {
+        $log.log("scope resize");
+        $scope.redrawMarkers();
+        $scope.$apply();
+    });
+}]);

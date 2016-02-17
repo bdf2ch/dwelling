@@ -4,20 +4,25 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css.css">
     <script src="angularjs/angular.min.js"></script>
 </head>
 <body>
-
-    <div id="dwelling" ng-app="dwellingApp">
-        <svg id="dwelling-svg">
-            <!--
-            <line x1="0" y1="0" x2="200" y2="200" stroke-width="1" stroke="rgb(0,0,0)"/>
-            <polyline id="test" points="0,0 50,0 150,100 250,100 300,150" fill="rgb(249,249,249)" stroke-width="5" stroke="rgb(0,0,0)"/>
-            -->
-        </svg>
+    <div id="dwelling" ng-app="dwellingApp" ng-controller="DwellingController">
+        <img src="img/complex.jpg">
+        <svg id="dwelling-svg"></svg>
+        <div class="dwelling-marker"
+             ng-repeat="marker in dwelling.markers.get()"
+             ng-show="marker.isVisible() === true"
+             ng-click="selectMarker(marker.id)"
+             ng-mousemove="markerMouseIn(marker.id)"
+             ng-mouseleave="markerMouseOut(marker.id)"
+             ng-class="{ 'queue': marker.class === 'queue', 'flats': marker.class === 'flats' }"
+             style="{{ 'left: ' + marker.xPosition + '; top: ' + marker.yPosition }}">
+                <span class="marker-caption">{{ marker.caption }}</span>
+                <span class="marker-title">{{ marker.title }}</span>
+        </div>
     </div>
-
-    <dwelling></dwelling>
     <script src="dwelling.js"></script>
 </body>
 </html>
