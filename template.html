@@ -6,21 +6,51 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css.css">
     <script src="angularjs/angular.min.js"></script>
+    <script src="angularjs/angular-animate.min.js"></script>
 </head>
 <body>
     <div id="dwelling" ng-app="dwellingApp" ng-controller="DwellingController">
-        <img src="img/complex.jpg">
-        <svg id="dwelling-svg"></svg>
+        <img id="dwelling-background-image" ng-src="{{ dwelling.get().getBackground() }}">
+        <svg id="dwelling-svg" xmlns="http://www.w3.org/2000/svg">
+            <polyline ng-repeat="queue in dwelling.queues.getAll()"
+                      ng-show="currentQueue === undefined"
+                      ng-attr-points="{{ queue.getCoords() }}"
+                      ng-click="selectQueue(queue.number)"
+                      ng-mousemove="queueMouseIn(queue)"
+                      ng-mouseleave="queueMouseOut(queue)"
+            />
+            <polyline ng-repeat="house in dwelling.houses.getAll()"
+                      ng-show="currentHouse === undefined && currentQueue !== undefined && house.queueNumber === currentQueue.number"
+                      ng-attr-points="{{ house.getCoords() }}"
+                      ng-click="selectHouse(house)"
+                      ng-mousemove="queueHouseIn(house)"
+                      ng-mouseleave="houseMouseOut(house)"
+            />
+        </svg>
         <div class="dwelling-marker"
-             ng-repeat="marker in dwelling.markers.get()"
+             ng-repeat="marker in dwelling.markers.getAll()"
              ng-show="marker.isVisible() === true"
-             ng-click="selectMarker(marker.id)"
-             ng-mousemove="markerMouseIn(marker.id)"
-             ng-mouseleave="markerMouseOut(marker.id)"
-             ng-class="{ 'queue': marker.class === 'queue', 'flats': marker.class === 'flats' }"
-             style="{{ 'left: ' + marker.xPosition + '; top: ' + marker.yPosition }}">
+             ng-click="onClickMarker(marker)"
+             ng-mousemove="markerMouseIn(marker.id, $event)"
+             ng-mouseleave="markerMouseOut(marker.id, $event)"
+             ng-class="{ 'queue': marker.class === 'queue', 'flats': marker.class === 'flats', 'filter': marker.class === 'filter' }"
+             style="{{ marker.getCoords() }}">
                 <span class="marker-caption">{{ marker.caption }}</span>
                 <span class="marker-title">{{ marker.title }}</span>
+        </div>
+
+        <div id="dwelling-phases" ng-show="filterPopup === false">
+            <div class="dwelling-marker back"
+                 ng-show="currentQueue !== undefined"
+                 ng-click="back()">
+            </div>
+            <div class="dwelling-marker phase phase-queue" ng-show="currentQueue !== undefined">{{ currentQueue.number }}<br/><span class="title">очередь</span></div>
+            <div class="dwelling-marker phase phase-house" ng-show="currentHouse !== undefined">{{ currentHouse.number }}<br/><span class="title">дом</span></div>
+        </div>
+
+        <div id="dwelling-filter-popup"
+             ng-show="filterPopup === true">
+            <div id="close-filter" class="dwelling-marker close-filter" ng-click="closeFilter()"></div>
         </div>
     </div>
     <script src="dwelling.js"></script>

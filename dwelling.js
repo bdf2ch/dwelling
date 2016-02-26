@@ -455,16 +455,197 @@ var data = {
 
 
 
+var dwellingContainer = document.getElementById("dwelling");
+var dwellingImg = document.getElementById("dwelling-background-image");
+var dwellingSvg = document.getElementById("dwelling-svg");
 
 
 
 
+/**
+ * Класс, описывающий контейнер модуля
+ * @param parameters {Object} - параметры инициализации объекта
+ * @constructor
+ */
+function Dwelling (parameters) {
+    this.title = "";
+    this.background = "";
+
+    var currentBackground = undefined;
+
+    if (parameters !== undefined) {
+        for (var param in parameters) {
+            if (this.hasOwnProperty(param))
+                this[param] = parameters[param];
+        }
+        if (this.background !== undefined && this.background !== "")
+            currentBackground = this.background;
+    }
+
+    this.getBackground = function () {
+        return currentBackground;
+    };
+
+    this.setBackground = function (url) {
+        if (url !== undefined && url !== "") {
+            currentBackground = url;
+        }
+    };
+};
 
 
-
-function House () {
+/**
+ * Класс, описывающий очередь строительства
+ * @param parameters {Object} - параметры инициализации объекта
+ * @constructor
+ */
+function Queue (parameters) {
     this.number = 0;
-    this.img = "";
+    this.background = "";
+    this.points = [];
+
+    var normalizedCoordinates = [];
+    var selected = false;
+
+    this.redraw = function () {
+        var width = dwellingContainer.clientWidth;
+        var height = dwellingContainer.clientHeight;
+        var length = this.points.length;
+        normalizedCoordinates.splice(0, normalizedCoordinates.length);
+        for (var i = 0; i < length; i++) {
+            normalizedCoordinates[i] = [];
+            normalizedCoordinates[i][0] = (width / 100) * this.points[i][0];
+            normalizedCoordinates[i][1] = (height / 100) * this.points[i][1];
+        }
+    };
+
+    if (parameters !== undefined) {
+        for (var param in parameters) {
+            if (this.hasOwnProperty(param))
+                this[param] = parameters[param];
+        }
+        if (this.points !== undefined && this.points.constructor === Array)
+            this.redraw();
+    }
+
+    this.getCoords = function () {
+        return normalizedCoordinates.join();
+    };
+
+    this.select = function (flag) {
+        if (flag !== undefined && flag.constructor === Boolean) {
+            selected = flag;
+            return selected;
+        }
+    };
+};
+
+
+/**
+ * Класс, описывающий маркер на карте
+ * @param parameters {Object} - параметры инициализации объекта
+ * @constructor
+ */
+function Marker (parameters) {
+    this.id = "";
+    this.point = [];
+    this.caption = "";
+    this.title = "";
+    this.class = "";
+    this.queueNumber = "";
+    this.houseNumber = "";
+
+    var normalizedCoordinates = [];
+    var visible = false;
+    var selected = false;
+
+    this.redraw = function () {
+        var width = dwellingContainer.clientWidth;
+        var height = dwellingContainer.clientHeight;
+        normalizedCoordinates.splice(0, normalizedCoordinates.length);
+        normalizedCoordinates[0] = (width / 100) * this.point[0];
+        normalizedCoordinates[1] = (height / 100) * this.point[1];
+    };
+
+    if (parameters !== undefined) {
+        for (var param in parameters) {
+            if (this.hasOwnProperty(param))
+                this[param] = parameters[param];
+        }
+        this.redraw();
+    }
+
+    this.getCoords = function () {
+        return "left: " + normalizedCoordinates[0] + "px; top: " + normalizedCoordinates[1] + "px;";
+    };
+
+    this.isVisible = function () {
+        return visible;
+    };
+
+    this.show = function () {
+        visible = true;
+    };
+
+    this.hide = function () {
+        visible = false;
+    };
+
+    this.select = function (flag) {
+        if (flag !== undefined && flag.constructor === Boolean) {
+            selected = flag;
+        }
+    };
+
+    this.isSelected = function () {
+        return selected;
+    };
+};
+
+
+
+
+
+function House (parameters) {
+    this.number = 0;
+    this.queueNumber = 0;
+    this.background = "";
+    this.points = [];
+
+    var normalizedCoordinates = [];
+    var visible = false;
+    var selected = false;
+
+    this.redraw = function () {
+        var width = dwellingContainer.clientWidth;
+        var height = dwellingContainer.clientHeight;
+        var length = this.points.length;
+        normalizedCoordinates.splice(0, normalizedCoordinates.length);
+        for (var i = 0; i < length; i++) {
+            normalizedCoordinates[i] = [];
+            normalizedCoordinates[i][0] = (width / 100) * this.points[i][0];
+            normalizedCoordinates[i][1] = (height / 100) * this.points[i][1];
+        }
+    };
+
+    if (parameters !== undefined) {
+        for (var param in parameters) {
+            if (this.hasOwnProperty(param) === true)
+                this[param] = parameters[param];
+        }
+        this.redraw();
+    }
+
+    this.getCoords = function () {
+        return normalizedCoordinates.join();
+    };
+
+    this.select = function (flag) {
+        if (flag !== undefined && flag.constructor === Boolean) {
+            selected = flag;
+            return selected;
+        }
+    };
 };
 
 
@@ -497,357 +678,224 @@ function Flat () {
 var dwellingModule = angular.module("dwelling", [])
     .config(function ($provide) {
         $provide.service("$dwelling", ["$log", "$http", "$window", function ($log, $http, $window) {
-            var service = {};
-
-            var container = document.getElementById("dwelling");
-            var svgContainer = document.getElementById("dwelling-svg");
-            var complex = undefined;
-            var queues = [];
+            var dwelling = undefined;
             var markers = [];
+            var queues = [];
+            var houses = [];
 
+            var service = {
 
-
-            /**
-             * Класс, описывающий маркер на карте
-             * @param parameters {Object} - параметры инициализации объекта
-             * @constructor
-             */
-            function Marker (parameters) {
-                this.id = "";
-                this.x = 0;
-                this.y = 0;
-                this.caption = "";
-                this.title = "";
-                this.class = "";
-                var visible = true;
-                this.xPosition = "0px";
-                this.yPosition = "0px";
-                this.queueId = "";
-
-
-                if (parameters !== undefined) {
-                    for (var param in parameters) {
-                        if (this.hasOwnProperty(param))
-                            this[param] = parameters[param];
-                    }
-                    var width = container.clientWidth;
-                    var height = container.clientHeight;
-                    this.xPosition = ((width / 100) * this.x) + "px";
-                    this.yPosition = ((height / 100) * this.y) + "px";
-                }
-
-                this.isVisible = function () {
-                    return visible;
-                };
-
-                this.show = function () {
-                    visible = true;
-                };
-
-                this.hide = function () {
-                    visible = false;
-                };
-
-                this.getX = function () {
-                    return this.xPosition;
-                };
-
-                this.getY = function () {
-                    return this.yPosition;
-                };
-            };
-
-
-            service.markers = {
-                items: [],
                 get: function () {
-                    return service.markers.items;
+                    return dwelling;
                 },
-                add: function (parameters) {
+                set: function (parameters) {
                     if (parameters !== undefined) {
-                        var marker = new Marker(parameters);
-                        service.markers.items.push(marker);
-                        return marker;
+                        dwelling = new Dwelling(parameters);
+                        if (dwelling.background !== undefined && dwelling.background !== "") {
+
+                        }
                     }
                 },
-                hide: function (markerId) {
-                    var markersLength = markers.length;
-                    for (var i = 0; i < markersLength; i++) {
-                        if (markerId !== undefined && markers[i].id === markerId)
-                            markers[i].hide();
-                        else
-                            markers[i].hide();
-                    }
-                }
-            };
 
-
-
-            /**
-             * Класс, описывающий жилой комплекс
-             * @param parameters {Object} - параметры инициализации объекта
-             * @constructor
-             */
-            function Complex (parameters) {
-                this.img = "";
-                var queues = [];
-
-                if (parameters !== undefined) {
-                    for (var param in parameters) {
-                        if (this.hasOwnProperty(param))
-                            this[param] = parameters[param];
-                    }
-                    if (this.img !== undefined && this.img !== "") {
-                        //svgContainer.style.backgroundImage = "url('" + this.img + "')";
-                    }
-                }
-
-                this.queues = {
-                    get: function () {
+                queues: {
+                    getAll: function () {
                         return queues;
                     },
                     add: function (parameters) {
                         if (parameters !== undefined) {
                             var queue = new Queue(parameters);
                             queues.push(queue);
+                            console.log("queue = ", queue);
                             return queue;
                         }
                     }
-                };
-            };
+                },
 
-
-
-            /**
-             * Класс, описывающий очередь строительства
-             * @param parameters {Object} - параметры инициализации объекта
-             * @constructor
-             */
-            function Queue (parameters) {
-                this.number = 0;
-                this.img = "";
-                this.geometry = [];
-
-                var element = undefined;
-                var selected = false;
-
-                if (parameters !== undefined) {
-                    for (var param in parameters) {
-                        if (this.hasOwnProperty(param))
-                            this[param] = parameters[param];
-                    }
-                }
-
-                this.select = function (flag) {
-                    if (flag !== undefined && glag.constructor === Boolean) {
-                        selected = flag;
-                        return selected;
-                    }
-                };
-
-                this.draw = function () {
-                    var width = container.clientWidth;
-                    var height = container.clientHeight;
-                    var scrollHeight = container.scrollHeight;
-                    var scrollWidth = container.scrollWidth;
-                    var scrollTop = container.scrollTop;
-                    var scrollLeft = container.scrollLeft;
-                    //$log.log("clientWidth = ", svgWidth, ", clientHeight = ", svgHeight);
-                    //$log.log("scrollHeight = ", scrollHeight);
-                    //$log.log("scrollTop = ", scrollTop);
-                    $log.log("container = ", angular.element(container));
-                    if (this.geometry.constructor === Array && this.geometry.length > 0) {
-                        var points = "";
-                        var length = this.geometry.length;
-                        for (var i = 0; i < length; i++) {
-                            //var proportionX = 1920 / svgWidth;
-                            //var proportionY = 1080 / svgHeight;
-                            //var offsetX = (1920 - svgWidth) / proportionX;
-                            //var proportion = svgWidth / svgHeight;
-                            //$log.log("proportionX = ", proportionX);
-                            //$log.log("proportionY = ", proportionY);
-
-                            var x = (((width / 100) * this.geometry[i][0]));
-                            var y = (((height / 100) * this.geometry[i][1]));
-                            //var y = ((scrollHeight / 100)  * this.geometry[i][1]);
-                            $log.log("x = ", x, ", y = ", y);
-                            var points = points +  x + "," + y;
-                            points = (i < length - 1) ? points + "," : points;
+                houses: {
+                    getAll: function () {
+                        return houses;
+                    },
+                    add: function (parameters) {
+                        if (parameters !== undefined) {
+                            var house = new House(parameters);
+                            houses.push(house);
+                            return house;
                         }
-                        if (element !== undefined) {
-                            element.setAttribute('points', points);
-                        } else {
-                            var polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-                            polyline.id = "queue-" + this.number;
-                            polyline.setAttribute('points', points);
-                            svgContainer.appendChild(polyline);
-                            element = polyline;
-                        }
-                        return this;
-                    }
-                };
-
-            };
-
-
-
-
-            angular.element($window).on("resize", function () {
-                $log.log("resized");
-                var length = complex.queues.get().length;
-                $log.log("length = ", length);
-                for (var i = 0; i < length; i ++) {
-                    complex.queues.get()[i].draw();
-                }
-
-                /*
-                var markers_length = service.markers.items.length;
-                for (var x = 0; x < markers_length; x++) {
-                    $log.log("xpos = ", service.markers.items[x].xPosition, ", ypos = ", service.markers.items[x].yPosition);
-                    service.markers.items[x].redraw();
-                    $log.log(service.markers.items[x]);
-                }
-                */
-            });
-
-
-
-            service.complex = {
-                set: function (parameters) {
-                    if (parameters !== undefined) {
-                        complex = new Complex(parameters);
                     }
                 },
 
-                get: function () {
-                    return complex;
+                markers: {
+                    getAll: function () {
+                        return markers;
+                    },
+                    add: function (parameters) {
+                        if (parameters !== undefined) {
+                            var marker = new Marker(parameters);
+                            markers.push(marker);
+                            return marker;
+                        }
+                    }
                 }
             };
 
-
-            service.getQueue = function () {
-                $http.post("")
-                    .success(function (data) {
-                        if (data !== undefined) {
-
-                        }
-                    });
-            };
-
-
-            service.getHouses = function () {
-                $http.post("")
-                    .success(function (data) {
-                        if (data !== undefined) {
-
-                        }
-                    });
-            };
-
-
-            service.getFlats = function (houseId) {
-                $http.post("")
-                    .success(function (data) {
-                        if (data !== undefined) {
-
-                        }
-                    });
-            };
 
 
             return service;
         }])
     })
     .run(function ($log, $dwelling) {
-        $dwelling.complex.set({
-            img: "img/complex.jpg"
+        $dwelling.set({
+            background: "img/01.jpg"
         });
-        //$dwelling.complex.get().queues.add({
-        //    geometry: [[328, 197], [195, 260], [196, 273], [303, 307], [426, 227], [426, 218]]
-        //}).draw().drawNumberMarker();
 
-        $dwelling.complex.get().queues.add({
-            geometry: [[32.9, 34.9], [19.6, 46.4], [19.7, 48.6], [30.4, 54.6], [42.8, 40.2], [42.8, 38.5]]
-        }).draw();
+        $dwelling.queues.add({
+            number: 1,
+            background: "img/queue_1.jpg",
+            points: [
+                [22.6, 62.5], [34.2, 79.8], [52.8, 60],
+                [44.7, 48.4], [44.6, 43], [42.4, 40.8],
+                [37.4, 47.1]
+            ]
+        });
 
         $dwelling.markers.add({
-            id: "testmarker",
-            x: 28,
-            y: 32,
+            id: "queue_1",
+            point: [34, 55],
             class: "queue",
             caption: "1",
-            title: "очередь"
-        });
+            title: "очередь",
+            queueNumber: 1
+        }).show();
 
         $dwelling.markers.add({
-            id: "testmarker2",
-            x: 29,
-            y: 31,
+            id: "queue_1_flats",
+            point: [38, 54.5],
             class: "flats",
             caption: "28",
             title: "квартир",
-            queueId: "testmarker"
+            queueNumber: 1
+        });
+
+        $dwelling.houses.add({
+            number: 1,
+            background: "img/house.jpg",
+            queueNumber: 1,
+            points: [
+                [57.6, 19.3], [54.2, 21.0], [54.2, 22.5],
+                [54.6, 22.5], [54.4, 35],   [59, 32],
+                [65, 33.8],   [64.6, 43],   [70, 45],
+                [77.1, 47],   [81.1, 43.1], [81.2, 40.3],
+                [77.3, 38.8], [78, 25]
+            ]
+        });
+
+        $dwelling.markers.add({
+            id: "house_1",
+            point: [60, 20],
+            class: "queue",
+            caption: 1,
+            title: "дом",
+            queueNumber: 2,
+            houseNumber: 1
+        });
+
+        $dwelling.markers.add({
+            id: "house_1_flats",
+            point: [64, 19.5],
+            class: "flats",
+            caption: 25,
+            title: "квартир",
+            queueNumber: 2,
+            houseNumber: 1
         }).hide();
 
-        //$dwelling.markers.hide("testmarker2");
+        $dwelling.queues.add({
+            number: 2,
+            background: "img/queue_2.jpg",
+            points: [
+                [52.8, 60],   [44.5, 48.4], [44.4, 43.4],
+                [43.3, 41.9], [45.4, 39.6], [45.4, 39],
+                [51.3, 31.6], [52.4, 32.5], [54.2, 30.6],
+                [54.2, 29.7], [59.8, 23],   [60.6, 23.8],
+                [62.7, 21.3], [62.7, 17.7], [64.5, 15.5],
+                [71.5, 23.8], [72.8, 22.2], [74.9, 24],
+                [74.4, 27.6], [75.5, 29.5], [76.5, 31.6],
+                [77, 32]
+            ]
+        });
 
-        $log.log("complex = ", $dwelling.complex.get());
+        $dwelling.markers.add({
+            id: "queue_2",
+            point: [55, 30],
+            class: "queue",
+            caption: "2",
+            title: "очередь",
+            queueNumber: 2
+        }).show();
+
+        $dwelling.markers.add({
+            id: "queue_2_flats",
+            point: [59, 29.5],
+            class: "flats",
+            caption: "54",
+            title: "квартиры",
+            queueNumber: 2
+        });
+
+        $dwelling.markers.add({
+            id: "filter",
+            point: [],
+            class: "filter",
+            caption: " ",
+            title: "",
+            queueNumber: 0
+        }).show();
+
     });
 
 
-var dwellingApp = angular.module("dwellingApp", ["dwelling"]);
-
-
-
+var dwellingApp = angular.module("dwellingApp", ["ngAnimate", "dwelling"]);
 
 dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", "$window", function ($log, $scope, $dwelling, $window) {
     $scope.dwelling = $dwelling;
+    $scope.filterPopup = false;
     $scope.currentQueue = undefined;
+    $scope.currentHouse = undefined;
 
-    $scope.redrawMarkers = function () {
-        var container = document.getElementById("dwelling");
-        var width = container.clientWidth;
-        var height = container.clientHeight;
-        var markersLength = $dwelling.markers.items.length;
-        for (var i = 0; i < markersLength; i++) {
-            $dwelling.markers.items[i].xPosition = (width / 100) * $dwelling.markers.items[i].x + "px";
-            $dwelling.markers.items[i].yPosition = (height / 100) * $dwelling.markers.items[i].y + "px";
-        }
 
-    };
-
-    $scope.selectMarker = function (markerId) {
-        if (markerId !== undefined) {
-            var markersLength = $dwelling.markers.get().length;
-            for (var i = 0; i < markersLength; i++) {
-                if ($dwelling.markers.get()[i].id === markerId) {
-                    if ($dwelling.markers.get()[i].class === "queue") {
-                        $scope.currentQueue = $dwelling.markers.get()[i];
-                        $log.log("current queue = ", $scope.currentQueue);
-                        /*
-                        for (var x = 0; x < markersLength; x++) {
-                            if ($dwelling.markers.get()[x].queueId !== undefined && $dwelling.markers.get()[x].queueId !== "" && $dwelling.markers.get()[x].queueId === markerId) {
-                                $dwelling.markers.get()[x].show();
-                            }
+    $scope.onClickMarker = function (marker) {
+        if (marker !== undefined) {
+            var length = $dwelling.markers.getAll().length;
+            switch (marker.class) {
+                case "queue":
+                    $scope.selectQueue(marker.queueNumber);
+                    break;
+                case "filter":
+                    $scope.filterPopup = true;
+                    var length = $dwelling.markers.getAll().length;
+                    for (var i = 0; i < length; i++) {
+                        var marker = $dwelling.markers.getAll()[i];
+                        if (marker.class === "filter") {
+                            marker.hide();
                         }
-                        */
                     }
-                }
+                    break;
             }
         }
     };
 
-    $scope.markerMouseIn = function (markerId) {
+    $scope.markerMouseIn = function (markerId, event) {
+        event.stopPropagation();
         if (markerId !== undefined) {
-            var markersLength = $dwelling.markers.get().length;
-            for (var i = 0; i < markersLength; i++) {
-                if ($dwelling.markers.get()[i].id === markerId) {
-                    if ($dwelling.markers.get()[i].class === "queue") {
-                        $scope.currentQueue = $dwelling.markers.get()[i];
-                        $log.log("current queue = ", $scope.currentQueue);
-                        for (var x = 0; x < markersLength; x++) {
-                            if ($dwelling.markers.get()[x].queueId !== undefined && $dwelling.markers.get()[x].queueId !== "" && $dwelling.markers.get()[x].queueId === markerId) {
-                                $dwelling.markers.get()[x].show();
+            var length = $dwelling.markers.getAll().length;
+            for (var i = 0; i < length; i++) {
+                var marker = $dwelling.markers.getAll()[i];
+                if (marker.class === "queue" && marker.id === markerId) {
+                    if (marker.class === "queue") {
+                        for (var x = 0; x < length; x++) {
+                            var marker_ = $dwelling.markers.getAll()[x];
+                            if (marker_.class === "flats" && marker_.queueNumber === marker.queueNumber) {
+                                marker_.show();
                             }
                         }
                     }
@@ -856,18 +904,18 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
         }
     };
 
-
-    $scope.markerMouseOut = function (markerId) {
+    $scope.markerMouseOut = function (markerId, event) {
+        event.stopPropagation();
         if (markerId !== undefined) {
-            var markersLength = $dwelling.markers.get().length;
-            for (var i = 0; i < markersLength; i++) {
-                if ($dwelling.markers.get()[i].id === markerId) {
-                    if ($dwelling.markers.get()[i].class === "queue") {
-                        $scope.currentQueue = $dwelling.markers.get()[i];
-                        $log.log("current queue = ", $scope.currentQueue);
-                        for (var x = 0; x < markersLength; x++) {
-                            if ($dwelling.markers.get()[x].queueId !== undefined && $dwelling.markers.get()[x].queueId !== "" && $dwelling.markers.get()[x].queueId === markerId) {
-                                $dwelling.markers.get()[x].hide();
+            var length = $dwelling.markers.getAll().length;
+            for (var i = 0; i < length; i++) {
+                var marker = $dwelling.markers.getAll()[i];
+                if (marker.id === markerId) {
+                    if (marker.class === "queue") {
+                        for (var x = 0; x < length; x++) {
+                            var marker_ = $dwelling.markers.getAll()[x];
+                            if (marker_.class === "flats" && marker_.queueNumber === marker.queueNumber) {
+                                marker_.hide();
                             }
                         }
                     }
@@ -875,10 +923,139 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
             }
         }
     };
+
+
+
+
+
+    $scope.back = function () {
+        if ($scope.currentHouse !== undefined) {
+            $dwelling.get().setBackground($scope.currentQueue.background);
+            $scope.currentHouse = undefined;
+        } else {
+            if ($scope.currentQueue !== undefined) {
+                $dwelling.get().setBackground($dwelling.get().background);
+                var length = $dwelling.markers.getAll().length;
+                for (var i = 0; i < length; i++) {
+                    var marker = $dwelling.markers.getAll()[i];
+                    if (marker.class === "queue")
+                        marker.show();
+                }
+                $scope.currentQueue = undefined;
+            }
+        }
+    };
+
+    $scope.selectQueue = function (queueNumber) {
+        if (queueNumber !== undefined) {
+            var length = $dwelling.queues.getAll().length;
+            for (var i = 0; i < length; i++) {
+                var queue = $dwelling.queues.getAll()[i];
+                if (queue.number === queueNumber) {
+                    queue.select(true);
+                    $scope.currentQueue = queue;
+                    $dwelling.get().setBackground(queue.background);
+                } else
+                    queue.select(false);
+            }
+            length = $dwelling.markers.getAll().length;
+            for (var i = 0; i < length; i++) {
+                var marker = $dwelling.markers.getAll()[i];
+                if (marker.class === "queue" || marker.class === "flats")
+                    marker.hide();
+                if (marker.class === "queue" && marker.houseNumber !== undefined && marker.houseNumber !== "")
+                    marker.show();
+            }
+            $log.log("current queue = ", $scope.currentQueue);
+        }
+    };
+
+    $scope.selectHouse = function (house) {
+        if (house !== undefined) {
+            var length = $dwelling.houses.getAll().length;
+            for (var i = 0; i < length; i++) {
+                var tempHouse = $dwelling.houses.getAll()[i];
+                if (tempHouse.number === house.number && tempHouse.queueNumber === house.queueNumber) {
+                    tempHouse.select(true);
+                    $scope.currentHouse = tempHouse;
+                    $dwelling.get().setBackground(house.background);
+                } else
+                    tempHouse.select(false);
+            }
+
+            var length = $dwelling.markers.getAll().length;
+            for (var i = 0; i < length; i++) {
+                var marker = $dwelling.markers.getAll()[i];
+                if (marker.class === "queue" && marker.houseNumber === house.number) {
+                    marker.show();
+                }
+            }
+        }
+    };
+
+    $scope.queueMouseIn = function (queue) {
+        if (queue !== undefined) {
+            var length = $dwelling.markers.getAll().length;
+            for (var i = 0; i < length; i++) {
+                var marker = $dwelling.markers.getAll()[i];
+                if (marker.class === "flats" && marker.queueNumber === queue.number) {
+                    marker.show();
+                }
+            }
+        }
+    };
+
+    $scope.queueMouseOut = function (queue) {
+        if (queue !== undefined) {
+            var length = $dwelling.markers.getAll().length;
+            for (var i = 0; i < length; i++) {
+                var marker = $dwelling.markers.getAll()[i];
+                if (marker.class === "flats" && marker.queueNumber === queue.number) {
+                    marker.hide();
+                }
+            }
+        }
+    };
+
+    $scope.showFilter = function () {
+        $log.log("popup");
+        $scope.filterPopup = true;
+    };
+
+    $scope.closeFilter = function () {
+        $scope.filterPopup = false;
+        var length = $dwelling.markers.getAll().length;
+        for (var i = 0; i < length; i++) {
+            var marker = $dwelling.markers.getAll()[i];
+            if (marker.class === "filter") {
+                marker.show();
+            }
+        }
+    };
+
+    $scope.redraw = function () {
+        var length = $dwelling.queues.getAll().length;
+        for (var i = 0; i < length; i++) {
+            $log.log($dwelling.queues.getAll()[i]);
+            $dwelling.queues.getAll()[i].redraw();
+        }
+        length = $dwelling.markers.getAll().length;
+        for (var i = 0; i < length; i++) {
+            $log.log($dwelling.markers.getAll()[i]);
+            $dwelling.markers.getAll()[i].redraw();
+        }
+        length = $dwelling.houses.getAll().length;
+        for (var i = 0; i < length; i++) {
+            //$log.log($dwelling.markers.getAll()[i]);
+            $dwelling.houses.getAll()[i].redraw();
+        }
+    };
+
 
     angular.element($window).on("resize", function () {
-        $log.log("scope resize");
-        $scope.redrawMarkers();
+        $scope.redraw();
         $scope.$apply();
     });
+
+    $scope.selectQueue(1);
 }]);

@@ -1,7 +1,10 @@
 #dwelling {
+  overflow: hidden;
 
   .dwelling-marker {
-    position: relative;
+    display: block;
+    position: absolute;
+    //clear: both;
     float: left;
     z-index: 5;
     font-family: Tahoma, Geneva, sans-serif;
@@ -27,6 +30,59 @@
       padding-top: 8px;
     }
 
+    &.back {
+      //position: relative;
+      background: url('img/sprite.png') no-repeat -353px -62px;
+      width: 55px;
+      height: 56px;
+      top: 20px;
+      //left: 10px;
+      margin-left: 0px;
+    }
+
+    &.filter {
+      position: absolute;
+      right: 30px;
+      bottom: 30px;
+      background: url('img/sprite.png') no-repeat -295px -476px;
+      width: 156px;
+      height: 159px;
+    }
+
+    &.close-filter {
+      float: left;
+      background: url('img/sprite.png') no-repeat -353px -62px;
+      width: 55px;
+      height: 56px;
+      margin-left: -27px;
+      margin-top: 30px;
+    }
+
+    &.phase {
+      width: 80px;
+      height: 80px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 10px;
+      padding-top: 18px;
+      border-radius: 50%;
+      font-size: 40px;
+      line-height: 17px;
+      color: #92C447;
+      background: white;
+      cursor: default;
+      &.phase-queue {
+        top: 90px;
+      }
+      &.phase-house {
+        top: 180px;
+      }
+      .title {
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+    }
+
     .marker-caption {
       display: block;
       font-size: 35px;
@@ -41,6 +97,52 @@
       color: white;
     }
 
+  }
+
+
+  #dwelling-phases {
+    position: relative;
+    width: 100px;
+    height: 100%;
+    float: left;
+    clear: both;
+    z-index: 5;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
+    //border: 2px solid white;
+    box-sizing: border-box;
+
+    &.ng-hide-add, &.ng-hide-add-remove {
+      transition: all linear 0.5s;
+    }
+
+    &.ng-hide {
+      line-height: 0;
+      opacity: 0;
+      padding: 0 10px;
+    }
+
+    .dwelling-marker {
+      margin-left: 20px;
+      margin-bottom: 20px;
+      &.phase {
+        margin-left: 10px;
+      }
+    }
+  }
+
+  #dwelling-filter-popup {
+    position: absolute;
+    right: 10%;
+    left: 10%;
+    top: 15%;
+    bottom: 15%;
+    width: 80%;
+    height: 70%;
+    float: left;
+    z-index: 7;
+    background: white;
   }
 
 }
