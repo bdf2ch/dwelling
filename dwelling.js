@@ -646,6 +646,12 @@ function House (parameters) {
             return selected;
         }
     };
+
+    this.fromJSON = function (JSONdata) {
+        if (JSONdata !== undefined) {
+
+        }
+    };
 };
 
 
@@ -669,6 +675,24 @@ function Flat () {
     this.livingNew = 0;
     this.categoryType = 0;
     this.windowView = 0;
+
+    this.fromJSON = function (JSONdata) {
+        if (JSONdata !== undefined) {
+            this.id = parseInt(JSONdata["id"]);
+            this.type = JSONdata["type"];
+            this.flatNumber = parseInt(JSONdata["geo_flatnum"]);
+            this.roomsCount = parseInt(JSONdata["estate_rooms"]);
+            this.entrance = parseInt(JSONdata["geo_house_entrance"]);
+            this.floor = parseInt(JSONdata["estate_floor"]);
+            this.area.total = JSONdata["estate_area"];
+            this.area.living = JSONdata["estate_area_living"];
+            this.area.kitchen = JSONdata["estate_area_kitchen"];
+            this.area.loggia = JSONdata["estate_area_loggia"];
+            this.price = JSONdata["estate_price"];
+            this.pricePerMeter = JSONdata["estate_price_m2"];
+            this.categoryType = JSONdata["estate_category_type_human"];
+        }
+    };
 };
 
 
@@ -682,6 +706,7 @@ var dwellingModule = angular.module("dwelling", [])
             var markers = [];
             var queues = [];
             var houses = [];
+            var flats = [];
 
             var service = {
 
@@ -724,6 +749,12 @@ var dwellingModule = angular.module("dwelling", [])
                     }
                 },
 
+                flats: {
+                    getAll: function () {
+                        return flats;
+                    }
+                },
+
                 markers: {
                     getAll: function () {
                         return markers;
@@ -734,6 +765,24 @@ var dwellingModule = angular.module("dwelling", [])
                             markers.push(marker);
                             return marker;
                         }
+                    }
+                },
+
+                getFlats: function (complexNumber, houseNumber, houseIndex) {
+                    if (complexNumber !== undefined && houseNumber !== undefined && houseIndex !== undefined) {
+                        var url = "http://i-mera.ru/estate/api/getFlats/" + complexNumber + "/" + houseNumber + "/" + houseIndex;
+                        $http.get(url)
+                            .success(function (data) {
+                                if (data !== undefined) {
+                                    //$log.log(data);
+                                    angular.forEach(data, function (flat_json) {
+                                        var flat = new Flat();
+                                        flat.fromJSON(flat_json);
+                                        flats.push(flat);
+                                        console.log(flat.flatNumber);
+                                    });
+                                }
+                            });
                     }
                 }
             };
@@ -795,7 +844,7 @@ var dwellingModule = angular.module("dwelling", [])
             class: "queue",
             caption: 1,
             title: "дом",
-            queueNumber: 2,
+            queueNumber: 1,
             houseNumber: 1
         });
 
@@ -805,7 +854,7 @@ var dwellingModule = angular.module("dwelling", [])
             class: "flats",
             caption: 25,
             title: "квартир",
-            queueNumber: 2,
+            queueNumber: 1,
             houseNumber: 1
         }).hide();
 
@@ -851,6 +900,9 @@ var dwellingModule = angular.module("dwelling", [])
             queueNumber: 0
         }).show();
 
+
+        $dwelling.getFlats(7, 1, 1);
+
     });
 
 
@@ -884,22 +936,29 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
         }
     };
 
-    $scope.markerMouseIn = function (markerId, event) {
+    $scope.markerMouseIn = function (marker, event) {
         event.stopPropagation();
-        if (markerId !== undefined) {
+        if (marker !== undefined) {
             var length = $dwelling.markers.getAll().length;
             for (var i = 0; i < length; i++) {
-                var marker = $dwelling.markers.getAll()[i];
-                if (marker.class === "queue" && marker.id === markerId) {
+                var temp_marker = $dwelling.markers.getAll()[i];
+                if ($scope.currentQueue !== undefined) {
                     if (marker.class === "queue") {
-                        for (var x = 0; x < length; x++) {
-                            var marker_ = $dwelling.markers.getAll()[x];
-                            if (marker_.class === "flats" && marker_.queueNumber === marker.queueNumber) {
-                                marker_.show();
-                            }
+                        if (temp_marker.class === "flats" && temp_marker.houseNumber !== "")
+                            temp_marker.show();
+                    }
+                } else {
+                    if (marker.class === "queue") {
+                        if (temp_marker.class === "flats" && temp_marker.queueNumber !== "" && temp_marker.houseNumber === "") {
+                            temp_marker.show();
                         }
                     }
                 }
+                //if (marker.class === "queue") {
+                //    if (temp_marker.class === "flats" && temp_marker.queueNumber !== "" && temp_marker.queueNumber === marker.queueNumber && temp_marker.houseNumber === "") {
+                //        temp_marker.show();
+                //    }
+                //}
             }
         }
     };
@@ -938,7 +997,11 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
                 var length = $dwelling.markers.getAll().length;
                 for (var i = 0; i < length; i++) {
                     var marker = $dwelling.markers.getAll()[i];
-                    if (marker.class === "queue")
+                    if (marker.class === "queue" && marker.houseNumber === "")
+                        marker.show();
+                    else
+                        marker.hide();
+                    if (marker.class === "filter")
                         marker.show();
                 }
                 $scope.currentQueue = undefined;
@@ -961,10 +1024,14 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
             length = $dwelling.markers.getAll().length;
             for (var i = 0; i < length; i++) {
                 var marker = $dwelling.markers.getAll()[i];
-                if (marker.class === "queue" || marker.class === "flats")
+                if (marker.class === "queue" && marker.queueNumber !== "" && marker.houseNumber === "")
                     marker.hide();
-                if (marker.class === "queue" && marker.houseNumber !== undefined && marker.houseNumber !== "")
+                if (marker.class === "queue" && marker.queueNumber === queueNumber && marker.houseNumber !== "")
                     marker.show();
+                //if (marker.class === "flats" && marker.queueNumber !== "")
+                //    marker.hide();
+                //if (marker.class === "queue" && marker.houseNumber !== "" && marker.queueNumber !== "" && marker.queueNumber === $scope.currentQueue.number)
+                //    marker.show();
             }
             $log.log("current queue = ", $scope.currentQueue);
         }
@@ -998,7 +1065,7 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
             var length = $dwelling.markers.getAll().length;
             for (var i = 0; i < length; i++) {
                 var marker = $dwelling.markers.getAll()[i];
-                if (marker.class === "flats" && marker.queueNumber === queue.number) {
+                if (marker.class === "flats" && marker.queueNumber === queue.number && marker.houseNumber === "") {
                     marker.show();
                 }
             }
@@ -1036,17 +1103,14 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
     $scope.redraw = function () {
         var length = $dwelling.queues.getAll().length;
         for (var i = 0; i < length; i++) {
-            $log.log($dwelling.queues.getAll()[i]);
             $dwelling.queues.getAll()[i].redraw();
         }
         length = $dwelling.markers.getAll().length;
         for (var i = 0; i < length; i++) {
-            $log.log($dwelling.markers.getAll()[i]);
             $dwelling.markers.getAll()[i].redraw();
         }
         length = $dwelling.houses.getAll().length;
         for (var i = 0; i < length; i++) {
-            //$log.log($dwelling.markers.getAll()[i]);
             $dwelling.houses.getAll()[i].redraw();
         }
     };
