@@ -684,12 +684,12 @@ function Flat () {
             this.roomsCount = parseInt(JSONdata["estate_rooms"]);
             this.entrance = parseInt(JSONdata["geo_house_entrance"]);
             this.floor = parseInt(JSONdata["estate_floor"]);
-            this.area.total = JSONdata["estate_area"];
+            this.area.total = parseFloat(JSONdata["estate_area"]).toFixed(2);
             this.area.living = JSONdata["estate_area_living"];
             this.area.kitchen = JSONdata["estate_area_kitchen"];
             this.area.loggia = JSONdata["estate_area_loggia"];
-            this.price = JSONdata["estate_price"];
-            this.pricePerMeter = JSONdata["estate_price_m2"];
+            this.price = parseFloat(JSONdata["estate_price"]).toFixed(0);
+            this.pricePerMeter = parseFloat(JSONdata["estate_price_m2"]);
             this.categoryType = JSONdata["estate_category_type_human"];
         }
     };
@@ -779,7 +779,7 @@ var dwellingModule = angular.module("dwelling", [])
                                         var flat = new Flat();
                                         flat.fromJSON(flat_json);
                                         flats.push(flat);
-                                        console.log(flat.flatNumber);
+                                        //console.log(flat.flatNumber);
                                     });
                                 }
                             });
@@ -913,6 +913,10 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
     $scope.filterPopup = false;
     $scope.currentQueue = undefined;
     $scope.currentHouse = undefined;
+
+    /* FILTERS */
+    $scope.minFloor = 0;
+    $scope.maxFloor = 0;
 
 
     $scope.onClickMarker = function (marker) {
@@ -1122,4 +1126,119 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
     });
 
     $scope.selectQueue(1);
+}]);
+
+
+
+dwellingModule.filter("floor", ["$log", function ($log) {
+    return function (input, minFloor, maxFloor) {
+        if (input.length > 0) {
+            var result = [];
+            var min = minFloor !== undefined ? minFloor : 0;
+            var max = maxFloor !== undefined && maxFloor !== 0 ? maxFloor : 100;
+            var length = input.length;
+            //$log.log("filtered length = ", length);
+            //$log.log("minFloor = ", min);
+            //$log.log("maxFloor = ", max);
+            for (var i = 0; i < length; i++) {
+                //$log.log("floor = ", input[i].floor);
+                if (input[i].floor >= min && input[i].floor <= max) {
+                    result.push(input[i]);
+                }
+            }
+            //$log.log("filtered = ", result);
+            return result;
+        } else
+            return input;
+    }
+}]);
+
+
+
+dwellingModule.directive("slider", ["$log", function ($log) {
+    return {
+        restrict: "E",
+        scope: {
+            manValue: "@",
+            maxValue: "@",
+            step: "@",
+            caption: "@"
+        },
+        template: "<div class='slider-control'>" +
+                       "<span class='slider-picker start'>" +
+                           "<span class='slider-picker-label'>1</span><span class='slider-picker-pin'></span>" +
+                       "</span>" +
+                       "<span class='slider-picker end'>" +
+                           "<span class='slider-picker-label'>2</span><span class='slider-picker-pin'></span>" +
+                       "</span>" +
+                       "<div class='slider-line'>" +
+                       "<div class='slider-caption'>{{ caption }}</div>" +
+                   "</div>",
+        replace: true,
+        link: function (scope, element, attrs) {
+            $log.log("slider directive");
+            var width = angular.element(element)[0].clientWidth;
+            var startPin = angular.element(element).children()[0];
+            var endPin = angular.element(element).children()[1];
+            var stepWidth = width / (parseInt(scope.maxValue) / parseInt(scope.step));
+            var startPinDown = false;
+            var endPinDown = false;
+            var startPinXPosition = 0;
+            //$log.log("startPin = ", startPin);
+            //$log.log("endPin = ", endPin);
+            $log.log("slider width = ", width);
+            $log.log("stepWidth = ", stepWidth);
+
+            angular.element(startPin).bind("mousedown", function (event) {
+                $log.log("start pin mousedown");
+                startPinDown = true;
+                startPinXPosition = event.clientX;
+            });
+
+            angular.element(startPin).bind("mousemove", function (event) {
+                if (startPinDown === true) {
+                    var left = event.clientX;
+                    //$log.log("clientX = ", left);
+                    if (left - startPinXPosition > 5) {
+                        $log.log("start pin drag right");
+                        startPin.style.left = startPin.style.left + stepWidth + "px";
+                        startPinXPosition = startPin.style.left + stepWidth;
+                    }
+                    //$log.log("event client x = ", event.clientX);
+                    //$log.log("start pin left = ", left);
+                }
+            });
+
+            angular.element(startPin).bind("mouseup", function (event) {
+                $log.log("start pin mouseup");
+                startPinDown = false;
+
+            });
+
+
+            angular.element(element).bind("mouseup", function (event) {
+                if (startPinDown === true) {
+                    $log.log("slider mouseup");
+                    startPinDown = false;
+                }
+            });
+
+            angular.element(element).bind("mouseleave", function (event) {
+                    $log.log("slider mouseleave");
+                    startPinDown = false;
+            });
+
+
+
+            angular.element(endPin).bind("mousedown", function () {
+                $log.log("end pin mousedown");
+                endPinDown = true;
+            });
+
+            angular.element(endPin).bind("mouseup", function () {
+                $log.log("end pin mouseup");
+                endPinDown = false;
+            });
+        }
+    }
 }]);

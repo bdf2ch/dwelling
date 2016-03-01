@@ -39,7 +39,7 @@
                 <span class="marker-title">{{ marker.title }}</span>
         </div>
 
-        <div id="dwelling-phases" ng-show="filterPopup === false">
+        <div id="dwelling-phases" ng-if="filterPopup === false">
             <div class="dwelling-marker back"
                  ng-show="currentQueue !== undefined"
                  ng-click="back()">
@@ -50,12 +50,40 @@
 
         <div id="dwelling-filter-popup" ng-show="filterPopup === true">
             <div id="close-filter" class="dwelling-marker close-filter" ng-click="closeFilter()"></div>
-            <div id="dwelling-filter-popup-sliders"></div>
+            <div id="dwelling-filter-popup-header">
+                <div id="header-left"><span ng-click="closeFilter()">Назад</span></div>
+                <div id="header-right">
+                    <table>
+                        <thead>
+                            <th style="width: 10%">Дом</th>
+                            <th style="width: 15%">Подъезд</th>
+                            <th style="width: 10%">Этаж</th>
+                            <th style="width: 10%">№</th>
+                            <th style="width: 10%">Комнат</th>
+                            <th style="width: 25%">Площадь, м<sup>2</sup></th>
+                            <th style="width: 20%">Цена, р.</th>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div id="dwelling-filter-popup-sliders">
+                <h2>Подбор по параметрам</h2>
+                <slider min-value="0" max-value="5" step="1" caption="этаж"></slider>
+            </div>
             <div id="dwelling-filter-popup-data">
                 <table>
                     <tbody>
-                    <tr ng-repeat="flat in dwelling.flats.getAll()">
-                        <td>{{ flat }}</td>
+                    <tr ng-repeat="flat in filtered = (dwelling.flats.getAll() | floor:minFloor:maxFloor)">
+                        <td style="width: 10%">дом</td>
+                        <td style="width: 15%">{{ flat.entrance }}</td>
+                        <td style="width: 10%">{{ flat.floor }}</td>
+                        <td style="width: 10%">{{ flat.flatNumber }}</td>
+                        <td style="width: 10%">{{ flat.roomsCount }}</td>
+                        <td style="width: 25%">{{ flat.area.total }}</td>
+                        <td style="width: 20%">{{ flat.price }}</td>
+                    </tr>
+                    <tr class="no-hover" ng-show="filtered.length === 0">
+                        <td colspan="4">Ничего не найдено. Попробуйте изменить условия поиска.</td>
                     </tr>
                     </tbody>
                 </table>

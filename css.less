@@ -55,20 +55,21 @@
       width: 55px;
       height: 56px;
       margin-left: -27px;
-      margin-top: 30px;
+      margin-top: 10px;
     }
 
     &.phase {
-      width: 80px;
-      height: 80px;
+      width: 85px;
+      height: 65px;
       margin-left: auto;
       margin-right: auto;
-      padding: 10px;
-      padding-top: 18px;
-      border-radius: 50%;
+      padding-left: 12px;
+      padding-right: 12px;
+      padding-top: 15px;
+      border-radius: 10px;
       font-size: 40px;
       line-height: 17px;
-      color: #92C447;
+      color: #0D47A1;
       background: white;
       cursor: default;
       &.phase-queue {
@@ -110,17 +111,21 @@
     padding-top: 20px;
     padding-bottom: 20px;
     text-align: center;
-    //border: 2px solid white;
     box-sizing: border-box;
+    margin-left: 0px;
+    transition:0.1s linear;
 
-    &.ng-hide-add, &.ng-hide-add-remove {
-      transition: all linear 0.5s;
+    &.ng-enter {
+      margin-left: -100px;
     }
-
-    &.ng-hide {
-      line-height: 0;
-      opacity: 0;
-      padding: 0 10px;
+    &.ng-enter-active {
+      margin-left: 0px;
+    }
+    &.ng-leave {
+      margin-left: 0px;
+    }
+    &.ng-leave-active {
+      margin-left: -100px;
     }
 
     .dwelling-marker {
@@ -139,10 +144,199 @@
     top: 15%;
     bottom: 15%;
     width: 80%;
+    min-width: 935px;
     height: 70%;
     float: left;
     z-index: 7;
     background: white;
+    box-sizing: border-box;
+
+    #dwelling-filter-popup-header {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      height: 50px;
+      padding-left: 10px;
+      padding-right: 20px;
+      //border: 1px solid green;
+
+      #header-left {
+        width: 400px;
+        height: 100%;
+        float: left;
+        padding-left: 35px;
+        padding-top: 30px;
+        box-sizing: border-box;
+        font-family: Helvetica;
+        font-size: 15px;
+        color: gray;
+       //border:1px solid red;
+
+        span {
+          cursor: pointer;
+        }
+      }
+
+      #header-right {
+        margin-left: 400px;
+        height: 100%;
+
+        table {
+          width: 100%;
+          border-spacing: 0px;
+
+          th {
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-top: 30px;
+            text-align: center;
+            color: darkgray;
+            font-family: "Verdana";
+            font-size: 11px;
+          }
+        }
+      }
+    }
+
+    #dwelling-filter-popup-sliders {
+      position: absolute;
+      top: 50px;
+      left: 0px;
+      bottom: 10px;
+      width: 400px;
+      padding-left: 45px;
+      padding-right: 45px;
+      box-sizing: border-box;
+      //border: 1px solid red;
+
+      h2 {
+        display: block;
+        font-family: "Helvetica";
+        font-size: 25px;
+        color: gray;
+        text-align: center;
+      }
+    }
+
+    #dwelling-filter-popup-data {
+      position: absolute;
+      top: 50px;
+      left: 400px;
+      right: 0px;
+      bottom: 10px;
+      padding: 10px;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      //border: 1px solid blue;
+      box-sizing: border-box;
+
+      table {
+        width: 100%;
+        border-spacing: 0px;
+
+        tbody tr {
+          cursor: pointer;
+
+          &.no-hover {
+            cursor: default !important;
+            background: white !important;
+            td {
+              padding-top: 100px;
+            }
+            &:hover {
+              background: white;
+              color: black;
+            }
+          }
+
+          &:hover {
+            background: #0D47A1;
+            color: white;
+          }
+
+          &:nth-child(odd) {
+            background: #FFF3E0;
+            &:hover {
+              background: #0D47A1;
+            }
+          }
+        }
+
+        tbody td {
+          padding: 15px;
+          font-family: Helvetica;
+          font-size: 18px;
+          font-weight: bold;
+          text-align: center;
+        }
+      }
+
+    }
   }
 
+
+
+  .slider-control {
+    position: relative;
+    height: 60px;
+    //padding-top: 5px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+    border: 1px solid black;
+
+    .slider-picker {
+      position: absolute;
+      display: inline-block;
+      width: 30px;
+      height: 50px;
+      //margin-bottom: -14px;
+      //border-radius: 50%;
+
+      cursor: pointer;
+      border: 1px solid red;
+
+      &.start {
+        left: 10px;
+      }
+
+      &.end {
+        right: 10px;
+      }
+
+      .slider-picker-label {
+        display: block;
+        height: 15px;
+        margin-bottom: 3px;
+        text-align: center;
+        border: 1px solid blue;
+      }
+
+      .slider-picker-pin {
+        display: inline-block;
+        height: 30px;
+        width: 30px;
+        border-radius: 50%;
+        background: #0D47A1;
+      }
+    }
+
+    .slider-line {
+      height: 2px;
+      //clear: both;
+      margin-top: 35px;
+      background: lightgray;
+      border-top: 1px solid darkgray;
+    }
+
+    .slider-caption {
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 5px;
+      text-align: center;
+      text-transform: uppercase;
+      font-family: "Verdana";
+      font-size: 12px;
+    }
+  }
 }
