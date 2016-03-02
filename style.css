@@ -15,16 +15,7 @@ html, body {
 
 }
 
-#dwelling img {
-    position: absolute;
-    height: 100%;
-    //min-height: 780px;
-    width: 100%;
-    //min-width: 1250px;
-    top: 0;
-    left: 0;
-    //border: 1px solid blue;
-}
+
 
 #dwelling #dwelling-svg {
     position: absolute;

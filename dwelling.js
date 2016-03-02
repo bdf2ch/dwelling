@@ -1,465 +1,9 @@
 "use strict";
 
-var data = {
-    "4": {
-        "id": "153813",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "4",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "1",
-        "estate_area": "53.8000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "1909900.0000",
-        "estate_price_m2": "35500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "5": {
-        "id": "153814",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "5",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "1",
-        "estate_area": "53.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "1902800.0000",
-        "estate_price_m2": "35500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView" :null
-    },
-    "10": {
-        "id": "153819",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "10",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "2",
-        "estate_area": "53.8000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2017500.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "12": {
-        "id": "153821",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "12",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "2",
-        "estate_area": "53.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2010000.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "19": {
-        "id": "153580",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "19",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "3",
-        "estate_area": "53.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2010000.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "20": {
-        "id": "153581",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "20",
-        "estate_rooms": "3",
-        "geo_house_entrance": "1",
-        "estate_floor": "3",
-        "estate_area": "82.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2932300.0000",
-        "estate_price_m2": "35500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "26": {
-        "id": "153587",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "26",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "4",
-        "estate_area": "53.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2010000.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "38": {
-        "id": "153599",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "38",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "6",
-        "estate_area": "53.8000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2017500.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "40": {
-        "id": "153601",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "40",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "6",
-        "estate_area": "53.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2010000.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "41": {
-        "id": "153602",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "41",
-        "estate_rooms": "3",
-        "geo_house_entrance": "1",
-        "estate_floor": "6",
-        "estate_area": "82.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2932300.0000",
-        "estate_price_m2": "35500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "45": {
-        "id": "153606",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "45",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "7",
-        "estate_area": "53.8000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2017500.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "48": {
-        "id": "153609",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "48",
-        "estate_rooms": "3",
-        "geo_house_entrance": "1",
-        "estate_floor": "7",
-        "estate_area": "82.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2932300.0000",
-        "estate_price_m2": "35500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "52": {
-        "id": "153613",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "52",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "8",
-        "estate_area": "53.8000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2017500.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "55": {
-        "id": "153616",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "55",
-        "estate_rooms": "3",
-        "geo_house_entrance": "1",
-        "estate_floor": "8",
-        "estate_area": "82.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2932300.0000",
-        "estate_price_m2": "35500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "59": {
-        "id": "153620",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "59",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "9",
-        "estate_area": "53.5000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2006250.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "61": {
-        "id": "153622",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "61",
-        "estate_rooms": "2",
-        "geo_house_entrance": "1",
-        "estate_floor": "9",
-        "estate_area": "53.4000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2002500.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "69": {
-        "id": "153630",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "69",
-        "estate_rooms": "3",
-        "geo_house_entrance": "2",
-        "estate_floor": "2",
-        "estate_area": "82.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2932300.0000",
-        "estate_price_m2": "35500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "70": {
-        "id": "153631",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "70",
-        "estate_rooms": "2",
-        "geo_house_entrance": "2",
-        "estate_floor": "2",
-        "estate_area": "53.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2010000.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "77": {
-        "id": "153638",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "77",
-        "estate_rooms": "2",
-        "geo_house_entrance": "2",
-        "estate_floor": "3",
-        "estate_area": "53.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2010000.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "79": {
-        "id": "153640",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "79",
-        "estate_rooms": "2",
-        "geo_house_entrance": "2",
-        "estate_floor": "3",
-        "estate_area": "53.8000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2017500.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "84": {
-        "id": "153645",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "84",
-        "estate_rooms": "2",
-        "geo_house_entrance": "2",
-        "estate_floor": "4",
-        "estate_area": "53.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2010000.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "90": {
-        "id": "153651",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "90",
-        "estate_rooms": "3",
-        "geo_house_entrance": "2",
-        "estate_floor": "5",
-        "estate_area": "82.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2932300.0000",
-        "estate_price_m2": "35500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "104": {
-        "id": "153665",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "104",
-        "estate_rooms": "3",
-        "geo_house_entrance": "2",
-        "estate_floor": "7",
-        "estate_area": "82.6000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2932300.0000",
-        "estate_price_m2": "35500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "114": {
-        "id": "153675",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "114",
-        "estate_rooms": "2",
-        "geo_house_entrance": "2",
-        "estate_floor": "8",
-        "estate_area": "53.8000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2017500.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    },
-    "121": {
-        "id": "153682",
-        "status": "20",
-        "type": "living",
-        "geo_flatnum": "121",
-        "estate_rooms": "2",
-        "geo_house_entrance": "2",
-        "estate_floor": "9",
-        "estate_area": "53.5000",
-        "estate_area_living": null,
-        "estate_area_kitchen": null,
-        "estate_area_loggia": null,
-        "estate_price": "2006250.0000",
-        "estate_price_m2": "37500.0000",
-        "estate_living_new": "1",
-        "estate_category_type": "12285",
-        "estate_windowView": null
-    }
-};
-
-
 
 var dwellingContainer = document.getElementById("dwelling");
 var dwellingImg = document.getElementById("dwelling-background-image");
 var dwellingSvg = document.getElementById("dwelling-svg");
-
-
 
 
 /**
@@ -913,10 +457,25 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
     $scope.filterPopup = false;
     $scope.currentQueue = undefined;
     $scope.currentHouse = undefined;
+    $scope.currentImgSrc = "";
+    $scope.img = dwellingImg;
+    $scope.imgIsLoading = false;
 
     /* FILTERS */
     $scope.minFloor = 0;
     $scope.maxFloor = 0;
+
+    $log.log(dwellingImg.src);
+
+    $scope.$watch("img.src", function (val) {
+        $log.log("src = ", val);
+        $scope.imgIsLoading = true;
+    });
+
+    angular.element(dwellingImg).bind("load", function (event) {
+        $log.log("image loaded");
+        $log.log(dwellingImg.src);
+    });
 
 
     $scope.onClickMarker = function (marker) {
@@ -1176,7 +735,7 @@ dwellingModule.directive("slider", ["$log", function ($log) {
                    "</div>",
         replace: true,
         link: function (scope, element, attrs) {
-            $log.log("slider directive");
+            //$log.log("slider directive");
             var width = angular.element(element)[0].clientWidth;
             var startPin = angular.element(element).children()[0];
             var endPin = angular.element(element).children()[1];
@@ -1184,29 +743,52 @@ dwellingModule.directive("slider", ["$log", function ($log) {
             var startPinDown = false;
             var endPinDown = false;
             var startPinXPosition = 0;
+            var endPinXPosition = 0;
+            var x = 0;
             //$log.log("startPin = ", startPin);
             //$log.log("endPin = ", endPin);
-            $log.log("slider width = ", width);
-            $log.log("stepWidth = ", stepWidth);
+            //$log.log("slider width = ", width);
+            //$log.log("stepWidth = ", stepWidth);
 
             angular.element(startPin).bind("mousedown", function (event) {
                 $log.log("start pin mousedown");
+
+                $log.log(angular.element(event.target)[0].offsetParent.offsetLeft);
                 startPinDown = true;
-                startPinXPosition = event.clientX;
+                startPinXPosition = event.pageX;
+                $log.log("start x = ", startPinXPosition);
             });
 
             angular.element(startPin).bind("mousemove", function (event) {
                 if (startPinDown === true) {
-                    var left = event.clientX;
-                    //$log.log("clientX = ", left);
-                    if (left - startPinXPosition > 5) {
-                        $log.log("start pin drag right");
-                        startPin.style.left = startPin.style.left + stepWidth + "px";
-                        startPinXPosition = startPin.style.left + stepWidth;
+                    if (event.pageX > startPinXPosition) {
+                        angular.element(startPin).css({
+                            "left": angular.element(startPin).prop("offsetLeft") + (event.pageX - startPinXPosition) + "px"
+                        });
+                        startPinXPosition = event.pageX;
                     }
-                    //$log.log("event client x = ", event.clientX);
-                    //$log.log("start pin left = ", left);
+
+                    $log.log("element offsetX = ", angular.element(element).prop("clientLeft"));
+                    if ((event.pageX <= startPinXPosition) && ((startPinXPosition - event.pageX) >= 0)) {
+                        $log.log("offsetX = ", angular.element(event.target)[0].offsetParent.offsetLeft);
+                        if (angular.element(event.target)[0].offsetParent.offsetLeft > 0) {
+                            angular.element(startPin).css({
+                                "left": angular.element(startPin).prop("offsetLeft") - (startPinXPosition - event.pageX) + "px"
+                            });
+                            startPinXPosition = event.pageX;
+                        } else {
+                            //startPinXPosition = 0;
+                            angular.element(startPin).css({
+                                "left": "0px"
+                            });
+                        }
+                    }
                 }
+            });
+
+            angular.element(startPin).bind("mouseleave", function (event) {
+                $log.log("start pin mouse leave");
+                startPinDown = false;
             });
 
             angular.element(startPin).bind("mouseup", function (event) {
@@ -1224,7 +806,7 @@ dwellingModule.directive("slider", ["$log", function ($log) {
             });
 
             angular.element(element).bind("mouseleave", function (event) {
-                    $log.log("slider mouseleave");
+                    //$log.log("slider mouseleave");
                     startPinDown = false;
             });
 

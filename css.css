@@ -1,6 +1,22 @@
 #dwelling {
   overflow: hidden;
 }
+#dwelling #dwelling-background-image {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+#dwelling #dwelling-background-image.loading {
+  transition: 0.1s linear;
+}
+#dwelling #dwelling-background-image.loading.ng-add {
+  opacity: 0;
+}
+#dwelling #dwelling-background-image.loading.ng-remove {
+  opacity: 1;
+}
 #dwelling .dwelling-marker {
   display: block;
   position: absolute;
@@ -133,6 +149,19 @@
   z-index: 7;
   background: white;
   box-sizing: border-box;
+  transition: 0.1s linear;
+}
+#dwelling #dwelling-filter-popup.ng-enter {
+  opacity: 0;
+}
+#dwelling #dwelling-filter-popup.ng-enter-active {
+  opacity: 1;
+}
+#dwelling #dwelling-filter-popup.ng-leave {
+  opacity: 1;
+}
+#dwelling #dwelling-filter-popup.ng-leave-active {
+  opacity: 0;
 }
 #dwelling #dwelling-filter-popup #dwelling-filter-popup-header {
   position: absolute;
@@ -168,7 +197,7 @@
 #dwelling #dwelling-filter-popup #dwelling-filter-popup-header #header-right table th {
   padding-left: 15px;
   padding-right: 15px;
-  padding-top: 30px;
+  padding-top: 25px;
   text-align: center;
   color: darkgray;
   font-family: "Verdana";
@@ -243,6 +272,12 @@
   padding-bottom: 10px;
   box-sizing: border-box;
   border: 1px solid black;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 #dwelling .slider-control .slider-picker {
   position: absolute;
@@ -250,13 +285,12 @@
   width: 30px;
   height: 50px;
   cursor: pointer;
-  border: 1px solid red;
 }
 #dwelling .slider-control .slider-picker.start {
-  left: 10px;
+  left: 0px;
 }
 #dwelling .slider-control .slider-picker.end {
-  right: 10px;
+  right: 0px;
 }
 #dwelling .slider-control .slider-picker .slider-picker-label {
   display: block;

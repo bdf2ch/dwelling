@@ -1,6 +1,24 @@
 #dwelling {
   overflow: hidden;
 
+  #dwelling-background-image {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+
+    &.loading {
+      transition: 0.1s linear;
+      &.ng-add {
+        opacity: 0;
+      }
+      &.ng-remove {
+        opacity: 1;
+      }
+    }
+  }
+
   .dwelling-marker {
     display: block;
     position: absolute;
@@ -113,7 +131,7 @@
     text-align: center;
     box-sizing: border-box;
     margin-left: 0px;
-    transition:0.1s linear;
+    transition: 0.1s linear;
 
     &.ng-enter {
       margin-left: -100px;
@@ -150,6 +168,20 @@
     z-index: 7;
     background: white;
     box-sizing: border-box;
+    transition: 0.1s linear;
+
+    &.ng-enter {
+      opacity: 0;
+    }
+    &.ng-enter-active {
+      opacity: 1;
+    }
+    &.ng-leave {
+      opacity: 1;
+    }
+    &.ng-leave-active {
+      opacity: 0;
+    }
 
     #dwelling-filter-popup-header {
       position: absolute;
@@ -189,7 +221,7 @@
           th {
             padding-left: 15px;
             padding-right: 15px;
-            padding-top: 30px;
+            padding-top: 25px;
             text-align: center;
             color: darkgray;
             font-family: "Verdana";
@@ -277,6 +309,8 @@
 
 
 
+
+
   .slider-control {
     position: relative;
     height: 60px;
@@ -284,6 +318,12 @@
     padding-bottom: 10px;
     box-sizing: border-box;
     border: 1px solid black;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 
     .slider-picker {
       position: absolute;
@@ -294,14 +334,14 @@
       //border-radius: 50%;
 
       cursor: pointer;
-      border: 1px solid red;
+      //border: 1px solid red;
 
       &.start {
-        left: 10px;
+        left: 0px;
       }
 
       &.end {
-        right: 10px;
+        right: 0px;
       }
 
       .slider-picker-label {
