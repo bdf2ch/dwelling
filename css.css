@@ -82,10 +82,10 @@
   cursor: default;
 }
 #dwelling .dwelling-marker.phase.phase-queue {
-  top: 90px;
+  top: 95px;
 }
 #dwelling .dwelling-marker.phase.phase-house {
-  top: 180px;
+  top: 185px;
 }
 #dwelling .dwelling-marker.phase .title {
   font-size: 14px;

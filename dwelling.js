@@ -225,7 +225,7 @@ function Flat () {
         if (JSONdata !== undefined) {
             this.id = parseInt(JSONdata["id"]);
             this.type = JSONdata["type"];
-            this.houseNumber = JSONdata["geo_house"];
+            this.houseNumber = parseInt(JSONdata["geo_house"]);
             this.flatNumber = parseInt(JSONdata["geo_flatnum"]);
             this.roomsCount = parseInt(JSONdata["estate_rooms"]);
             this.entrance = parseInt(JSONdata["geo_house_entrance"]);
@@ -605,6 +605,13 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
         if ($scope.currentHouse !== undefined) {
             $dwelling.get().setBackground($scope.currentQueue.background);
             $scope.currentHouse = undefined;
+            $scope.filterPopup = false;
+            var length = $dwelling.markers.getAll().length;
+            for (var i = 0; i < length; i++) {
+                var marker = $dwelling.markers.getAll()[i];
+                if (marker.class === "filter")
+                    marker.show();
+            }
         } else {
             if ($scope.currentQueue !== undefined) {
                 $dwelling.get().setBackground($dwelling.get().background);
@@ -670,7 +677,10 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
                 if (marker.class === "queue" && marker.houseNumber === house.number) {
                     marker.show();
                 }
+                if (marker.class === "filter")
+                    marker.hide();
             }
+            $scope.filterPopup = true;
         }
     };
 
@@ -806,6 +816,27 @@ dwellingModule.filter("area", ["$log", function ($log) {
     }
 }]);
 
+dwellingModule.filter("house", ["$log", function ($log) {
+    return function (input, houseNumber) {
+        if (input.length > 0) {
+            var result = [];
+            var number = houseNumber !== undefined ? houseNumber : 0;
+            $log.log("houseNumber = ", number);
+            if (number !== 0) {
+                var length = input.length;
+                for (var i = 0; i < length; i++) {
+                    if (input[i].houseNumber === houseNumber) {
+                        result.push(input[i]);
+                    }
+                }
+                return result;
+            } else
+                return input;
+        } else
+            return input;
+    }
+}]);
+
 
 dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) {
     return {
@@ -864,10 +895,10 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                     stepX = step.end;
                 }
             } else {
-                for (var i = parseInt(scope.minValueModel); i <= parseInt(scope.maxValueModel); i++) {
+                for (var i = parseInt(scope.minValueModel); i < parseInt(scope.maxValueModel); i++) {
                     var step = {
                         start: stepX,
-                        end: (width - end.width - start.width) / (parseInt(scope.maxValueModel - 1) / parseFloat(scope.step)) + stepX
+                        end: (width - end.width - start.width) / (parseInt(scope.maxValueModel - 1) / parseInt(scope.step)) + stepX
                     };
                     steps.push(step);
                     stepX = step.end;
@@ -911,7 +942,8 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                 if (start.pressed === true) {
                     start.offsetLeft = angular.element(start.element).prop("offsetLeft");
                     end.offsetLeft = angular.element(end.element).prop("offsetLeft");
-                    if ((event.pageX > start.pageX) && start.offsetLeft < (end.offsetLeft - end.width + 1)) {
+
+                    if ((event.pageX > start.pageX) && start.offsetLeft < (end.offsetLeft - end.width)) {
                         angular.element(start.element).css({
                             "left": start.offsetLeft + (event.pageX - start.pageX) + "px"
                         });
@@ -967,7 +999,7 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                             if (isFloat(Number(scope.step)) === true)
                                 scope.maxValueModel = parseFloat((parseFloat(i / 10) - 0.1).toFixed(1));
                             else
-                                scope.maxValueModel = i - 1;
+                                scope.maxValueModel = (i + 1) + parseInt(scope.step);
                             scope.$apply();
                         }
                     }
