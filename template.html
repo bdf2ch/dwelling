@@ -68,19 +68,25 @@
             </div>
             <div id="dwelling-filter-popup-sliders">
                 <h2>Подбор по параметрам</h2>
-                <slider min-value="0" max-value="5" step="1" caption="этаж"></slider>
+                <slider min-value="0" min-value-model="filters.minFloor" max-value-model="filters.maxFloor" max-value="5" step="1" caption="этаж"></slider>
+                <slider min-value="0" min-value-model="filters.minRoomsCount" max-value-model="filters.maxRoomsCount" max-value="5" step="1" caption="комнат"></slider>
+                <slider min-value="0" min-value-model="filters.minArea" max-value-model="filters.maxArea" max-value="5" step="1" caption="площадь, м2"></slider>
+                <slider min-value="0" min-value-model="filters.minPrice" max-value-model="filters.maxPrice" max-value="5" step="0.1" caption="цена, млн. р."></slider>
+                <div id="dwelling-filter-popup-total">
+                    Найдено <span class="big">{{ filtered.length }}</span> квартир<span ng-show="">ы</span>
+                </div>
             </div>
             <div id="dwelling-filter-popup-data">
                 <table>
                     <tbody>
-                    <tr ng-repeat="flat in filtered = (dwelling.flats.getAll() | floor:minFloor:maxFloor)">
-                        <td style="width: 10%">дом</td>
+                    <tr ng-repeat="flat in filtered = (dwelling.flats.getAll() | floor:filters.minFloor:filters.maxFloor | rooms:filters.minRoomsCount:filters.maxRoomsCount | area:filters.minArea:filters.maxArea)">
+                        <td style="width: 10%">{{ flat.houseNumber }}</td>
                         <td style="width: 15%">{{ flat.entrance }}</td>
                         <td style="width: 10%">{{ flat.floor }}</td>
                         <td style="width: 10%">{{ flat.flatNumber }}</td>
                         <td style="width: 10%">{{ flat.roomsCount }}</td>
                         <td style="width: 25%">{{ flat.area.total }}</td>
-                        <td style="width: 20%">{{ flat.price }}</td>
+                        <td style="width: 20%">{{ flat.price.toLocaleString() }}</td>
                     </tr>
                     <tr class="no-hover" ng-show="filtered.length === 0">
                         <td colspan="4">Ничего не найдено. Попробуйте изменить условия поиска.</td>

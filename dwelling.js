@@ -204,6 +204,7 @@ function Flat () {
     this.id = 0;
     this.status = 0;
     this.type = "";
+    this.houseNumber = 0;
     this.flatNumber = 0;
     this.roomsCount = 0;
     this.entrance = 0;
@@ -224,15 +225,16 @@ function Flat () {
         if (JSONdata !== undefined) {
             this.id = parseInt(JSONdata["id"]);
             this.type = JSONdata["type"];
+            this.houseNumber = JSONdata["geo_house"];
             this.flatNumber = parseInt(JSONdata["geo_flatnum"]);
             this.roomsCount = parseInt(JSONdata["estate_rooms"]);
             this.entrance = parseInt(JSONdata["geo_house_entrance"]);
             this.floor = parseInt(JSONdata["estate_floor"]);
-            this.area.total = parseFloat(JSONdata["estate_area"]).toFixed(2);
+            this.area.total = parseFloat(parseFloat(JSONdata["estate_area"]).toFixed(2));
             this.area.living = JSONdata["estate_area_living"];
             this.area.kitchen = JSONdata["estate_area_kitchen"];
             this.area.loggia = JSONdata["estate_area_loggia"];
-            this.price = parseFloat(JSONdata["estate_price"]).toFixed(0);
+            this.price = parseFloat(parseFloat(JSONdata["estate_price"]).toFixed(0));
             this.pricePerMeter = parseFloat(JSONdata["estate_price_m2"]);
             this.categoryType = JSONdata["estate_category_type_human"];
         }
@@ -328,6 +330,23 @@ var dwellingModule = angular.module("dwelling", [])
                                 }
                             });
                     }
+                },
+
+                getFlatsByComplexNumber: function (complexNumber) {
+                    if (complexNumber !== undefined) {
+                        var url = "http://i-mera.ru/estate/api/getFlats/" + complexNumber + "/";
+                        $http.post(url)
+                            .success(function (data) {
+                                if (data !== undefined) {
+                                    $log.log(data);
+                                    angular.forEach(data, function (flat) {
+                                        var temp_flat = new Flat();
+                                        temp_flat.fromJSON(flat);
+                                        flats.push(temp_flat);
+                                    });
+                                }
+                            });
+                    }
                 }
             };
 
@@ -337,6 +356,8 @@ var dwellingModule = angular.module("dwelling", [])
         }])
     })
     .run(function ($log, $dwelling) {
+        $dwelling.getFlatsByComplexNumber(7);
+
         $dwelling.set({
             background: "img/01.jpg"
         });
@@ -445,7 +466,7 @@ var dwellingModule = angular.module("dwelling", [])
         }).show();
 
 
-        $dwelling.getFlats(7, 1, 1);
+        //$dwelling.getFlats(7, 1, 1);
 
     });
 
@@ -462,21 +483,51 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
     $scope.imgIsLoading = false;
 
     /* FILTERS */
-    $scope.minFloor = 0;
-    $scope.maxFloor = 0;
+    $scope.filters = {
+        minFloor: 1,
+        maxFloor: 0,
+        minRoomsCount: 1,
+        maxRoomsCount: 0,
+        minArea: 1,
+        maxArea: 0,
+        minPrice: 0.1,
+        maxPrice: 0
+    };
 
-    $log.log(dwellingImg.src);
+    //$log.log(dwellingImg.src);
 
     $scope.$watch("img.src", function (val) {
-        $log.log("src = ", val);
-        $scope.imgIsLoading = true;
+       // $log.log("src = ", val);
+       // $scope.imgIsLoading = true;
     });
 
     angular.element(dwellingImg).bind("load", function (event) {
         $log.log("image loaded");
-        $log.log(dwellingImg.src);
+        //$log.log(dwellingImg.src);
     });
 
+
+    $scope.$watchCollection("dwelling.flats.getAll()", function (value) {
+        $log.log("flats = ", value);
+        if (value.length > 0) {
+            $log.log("start, ", value.length);
+            var length = value.length;
+            for (var i = 0; i < length; i++) {
+                $scope.filters.minFloor = value[i].floor < $scope.filters.minFloor ? value[i].floor : $scope.filters.minFloor;
+                $scope.filters.maxFloor = value[i].floor > $scope.filters.maxFloor ? value[i].floor : $scope.filters.maxFloor;
+                $scope.filters.minRoomsCount = value[i].roomsCount < $scope.filters.minRoomsCount ? value[i].roomsCount : $scope.filters.minRoomsCount;
+                $scope.filters.maxRoomsCount = value[i].roomsCount > $scope.filters.maxRoomsCount ? value[i].roomsCount : $scope.filters.maxRoomsCount;
+                $scope.filters.minArea = value[i].area.total < $scope.filters.minArea ? parseInt(value[i].area.total) : $scope.filters.minArea;
+                $scope.filters.maxArea = value[i].area.total > $scope.filters.maxArea ? parseInt(value[i].area.total) : $scope.filters.maxArea;
+                $scope.filters.minPrice = parseFloat((value[i].price / 1000000).toFixed(1)) < $scope.filters.minPrice ? parseFloat((value[i].price / 1000000).toFixed(1)) : $scope.filters.minPrice;
+                $scope.filters.maxPrice = parseFloat((value[i].price / 1000000).toFixed(1)) > $scope.filters.maxPrice ? parseFloat((value[i].price / 1000000).toFixed(1)) : $scope.filters.maxPrice;
+            }
+            $log.log("min floor = ", $scope.filters.minFloor, ", max floor = ", $scope.filters.maxFloor);
+            $log.log("min rooms = ", $scope.filters.minRoomsCount, ", max rooms = ", $scope.filters.maxRoomsCount);
+            $log.log("min area = ", $scope.filters.minArea, ", max area = ", $scope.filters.maxArea);
+            $log.log("min price = ", $scope.filters.minPrice, ", max price = ", $scope.filters.maxPrice);
+        }
+    });
 
     $scope.onClickMarker = function (marker) {
         if (marker !== undefined) {
@@ -700,7 +751,6 @@ dwellingModule.filter("floor", ["$log", function ($log) {
             //$log.log("minFloor = ", min);
             //$log.log("maxFloor = ", max);
             for (var i = 0; i < length; i++) {
-                //$log.log("floor = ", input[i].floor);
                 if (input[i].floor >= min && input[i].floor <= max) {
                     result.push(input[i]);
                 }
@@ -712,115 +762,249 @@ dwellingModule.filter("floor", ["$log", function ($log) {
     }
 }]);
 
+dwellingModule.filter("rooms", ["$log", function ($log) {
+    return function (input, minRooms, maxRooms) {
+        if (input.length > 0) {
+            var result = [];
+            var min = minRooms !== undefined ? minRooms : 0;
+            var max = maxRooms !== undefined && maxRooms !== 0 ? maxRooms : 100;
+            var length = input.length;
+            //$log.log("filtered length = ", length);
+            //$log.log("minFloor = ", min);
+            //$log.log("maxFloor = ", max);
+            for (var i = 0; i < length; i++) {
+                if (input[i].roomsCount >= min && input[i].roomsCount <= max) {
+                    result.push(input[i]);
+                }
+            }
+            //$log.log("filtered = ", result);
+            return result;
+        } else
+            return input;
+    }
+}]);
+
+dwellingModule.filter("area", ["$log", function ($log) {
+    return function (input, minArea, maxArea) {
+        if (input.length > 0) {
+            var result = [];
+            var min = minArea !== undefined ? minArea : 0;
+            var max = maxArea !== undefined && maxArea !== 0 ? maxArea : 100;
+            var length = input.length;
+            //$log.log("filtered length = ", length);
+            //$log.log("minFloor = ", min);
+            //$log.log("maxFloor = ", max);
+            for (var i = 0; i < length; i++) {
+                if (input[i].area.total >= min && input[i].area.total <= max) {
+                    result.push(input[i]);
+                }
+            }
+            //$log.log("filtered = ", result);
+            return result;
+        } else
+            return input;
+    }
+}]);
 
 
-dwellingModule.directive("slider", ["$log", function ($log) {
+dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) {
     return {
         restrict: "E",
         scope: {
             manValue: "@",
             maxValue: "@",
+            minValueModel: "=",
+            maxValueModel: "=",
             step: "@",
             caption: "@"
         },
         template: "<div class='slider-control'>" +
                        "<span class='slider-picker start'>" +
-                           "<span class='slider-picker-label'>1</span><span class='slider-picker-pin'></span>" +
+                           "<span class='slider-picker-label'>{{ minValueModel }}</span><span class='slider-picker-pin'></span>" +
                        "</span>" +
                        "<span class='slider-picker end'>" +
-                           "<span class='slider-picker-label'>2</span><span class='slider-picker-pin'></span>" +
+                           "<span class='slider-picker-label'>{{ maxValueModel }}</span><span class='slider-picker-pin'></span>" +
                        "</span>" +
                        "<div class='slider-line'>" +
                        "<div class='slider-caption'>{{ caption }}</div>" +
                    "</div>",
         replace: true,
         link: function (scope, element, attrs) {
-            //$log.log("slider directive");
+            var isFloat = function(n){
+                return Number(n) === n && n % 1 !== 0;
+            };
+            var start = {
+                element: angular.element(element).children()[0],
+                width: angular.element(element).children()[0].clientWidth,
+                offsetLeft: 0,
+                pageX: 0,
+                startPageX: 0,
+                pressed: false
+            };
+            var end = {
+                element: angular.element(element).children()[1],
+                width: angular.element(element).children()[1].clientWidth,
+                offsetLeft: 0,
+                pageX: 0,
+                pressed: false
+            };
             var width = angular.element(element)[0].clientWidth;
-            var startPin = angular.element(element).children()[0];
-            var endPin = angular.element(element).children()[1];
-            var stepWidth = width / (parseInt(scope.maxValue) / parseInt(scope.step));
-            var startPinDown = false;
-            var endPinDown = false;
-            var startPinXPosition = 0;
-            var endPinXPosition = 0;
-            var x = 0;
-            //$log.log("startPin = ", startPin);
-            //$log.log("endPin = ", endPin);
-            //$log.log("slider width = ", width);
-            //$log.log("stepWidth = ", stepWidth);
+            $log.log("width = ", width);
+            var step = isFloat(scope.step) ? parseFloat(scope.step) : parseInt(scope.step);
+            var steps = [];
+            var stepX = 0;
 
-            angular.element(startPin).bind("mousedown", function (event) {
+            if (isFloat(Number(scope.step)) === true) {
+                for (var i = parseFloat(scope.minValueModel); i <= parseFloat(scope.maxValueModel) / parseFloat(scope.step); i += parseFloat(scope.step)) {
+                    var step = {
+                        start: stepX,
+                        end: (width - end.width - start.width) / (parseFloat(scope.maxValueModel - 1) / parseFloat(scope.step)) + stepX
+                    };
+                    steps.push(step);
+                    stepX = step.end;
+                }
+            } else {
+                for (var i = parseInt(scope.minValueModel); i <= parseInt(scope.maxValueModel); i++) {
+                    var step = {
+                        start: stepX,
+                        end: (width - end.width - start.width) / (parseInt(scope.maxValueModel - 1) / parseFloat(scope.step)) + stepX
+                    };
+                    steps.push(step);
+                    stepX = step.end;
+                }
+            }
+
+
+            $log.log("step is float", isFloat(Number(scope.step)));
+            $log.log("step count = ", steps.length);
+            $log.log("steps = ", steps);
+
+            scope.$watch("minValueModel", function (value) {
+                $log.log("minValueModel = ", value);
+                scope.minValueModel = value;
+            });
+
+            scope.$watch("maxValueModel", function (value) {
+                $log.log("maxValueModel = ", value);
+                scope.maxValueModel = value;
+            });
+
+            angular.element(start.element).bind("mousedown", function (event) {
                 $log.log("start pin mousedown");
 
                 $log.log(angular.element(event.target)[0].offsetParent.offsetLeft);
-                startPinDown = true;
-                startPinXPosition = event.pageX;
-                $log.log("start x = ", startPinXPosition);
+                start.pressed = true;
+                start.pageX = event.pageX;
+                start.startPageX = event.pageX;
+                $log.log("start x = ", start.pageX);
             });
 
-            angular.element(startPin).bind("mousemove", function (event) {
-                if (startPinDown === true) {
-                    if (event.pageX > startPinXPosition) {
-                        angular.element(startPin).css({
-                            "left": angular.element(startPin).prop("offsetLeft") + (event.pageX - startPinXPosition) + "px"
+            angular.element(end.element).bind("mousedown", function () {
+                $log.log("end pin mousedown");
+                end.pressed = true;
+                end.pageX = event.pageX;
+                end.startPageX = event.pageX;
+            });
+
+
+            angular.element(window).bind("mousemove", function (event) {
+                if (start.pressed === true) {
+                    start.offsetLeft = angular.element(start.element).prop("offsetLeft");
+                    end.offsetLeft = angular.element(end.element).prop("offsetLeft");
+                    if ((event.pageX > start.pageX) && start.offsetLeft < (end.offsetLeft - end.width + 1)) {
+                        angular.element(start.element).css({
+                            "left": start.offsetLeft + (event.pageX - start.pageX) + "px"
                         });
-                        startPinXPosition = event.pageX;
+                        start.pageX = event.pageX;
                     }
 
-                    $log.log("element offsetX = ", angular.element(element).prop("clientLeft"));
-                    if ((event.pageX <= startPinXPosition) && ((startPinXPosition - event.pageX) >= 0)) {
-                        $log.log("offsetX = ", angular.element(event.target)[0].offsetParent.offsetLeft);
-                        if (angular.element(event.target)[0].offsetParent.offsetLeft > 0) {
-                            angular.element(startPin).css({
-                                "left": angular.element(startPin).prop("offsetLeft") - (startPinXPosition - event.pageX) + "px"
-                            });
-                            startPinXPosition = event.pageX;
-                        } else {
-                            //startPinXPosition = 0;
-                            angular.element(startPin).css({
-                                "left": "0px"
-                            });
+                    if ((event.pageX < start.pageX) && start.offsetLeft > 0) {
+                        angular.element(start.element).css({
+                            "left": start.offsetLeft - (start.pageX - event.pageX) + "px"
+                        });
+                        start.pageX = event.pageX;
+                    }
+
+                    var stepsLength = steps.length;
+                    for (var i = 0; i < stepsLength; i++) {
+                        var step = steps[i];
+                        if (start.offsetLeft > step.start && start.offsetLeft < step.end) {
+                            $log.log("isFloat = ", isFloat(Number(scope.step)));
+                            if (isFloat(Number(scope.step)) === true)
+                                scope.minValueModel = parseFloat((parseFloat(i / 10) + 0.1).toFixed(1));
+                             else
+                                scope.minValueModel = i + 1;
+                            scope.$apply();
                         }
                     }
                 }
-            });
 
-            angular.element(startPin).bind("mouseleave", function (event) {
-                $log.log("start pin mouse leave");
-                startPinDown = false;
-            });
+                if (end.pressed === true) {
+                    start.offsetLeft = angular.element(start.element).prop("offsetLeft");
+                    end.offsetLeft = angular.element(end.element).prop("offsetLeft");
 
-            angular.element(startPin).bind("mouseup", function (event) {
-                $log.log("start pin mouseup");
-                startPinDown = false;
+                    if ((event.pageX > end.pageX) && end.offsetLeft < (width - end.width)) {
+                        angular.element(end.element).css({
+                            "left": end.offsetLeft + (event.pageX - end.pageX) + "px"
+                        });
+                        end.pageX = event.pageX;
+                    }
 
-            });
+
+                    if ((event.pageX < end.pageX) && end.offsetLeft > (start.offsetLeft + start.width)) {
+                        angular.element(end.element).css({
+                            "left": end.offsetLeft - (end.pageX - event.pageX) + "px"
+                        });
+                        end.pageX = event.pageX;
+                    }
 
 
-            angular.element(element).bind("mouseup", function (event) {
-                if (startPinDown === true) {
-                    $log.log("slider mouseup");
-                    startPinDown = false;
+                    var stepsLength = steps.length;
+                    for (var i = 0; i < stepsLength; i++) {
+                        var step = steps[i];
+                        if (end.offsetLeft > step.start && end.offsetLeft < step.end) {
+                            $log.log("isFloat = ", isFloat(Number(scope.step)));
+                            if (isFloat(Number(scope.step)) === true)
+                                scope.maxValueModel = parseFloat((parseFloat(i / 10) - 0.1).toFixed(1));
+                            else
+                                scope.maxValueModel = i - 1;
+                            scope.$apply();
+                        }
+                    }
+
                 }
             });
 
-            angular.element(element).bind("mouseleave", function (event) {
-                    //$log.log("slider mouseleave");
-                    startPinDown = false;
+            angular.element(start.element).bind("mouseleave", function (event) {
+                $log.log("start pin mouse leave");
+                //start.pressed = false;
+            });
+
+            angular.element($window).bind("mouseup", function (event) {
+                start.pressed = false;
+                end.pressed = false;
             });
 
 
-
-            angular.element(endPin).bind("mousedown", function () {
-                $log.log("end pin mousedown");
-                endPinDown = true;
+            /*
+            angular.element(element).bind("mouseup", function (event) {
+                if (start.pressed === true) {
+                    $log.log("slider mouseup");
+                    start.pressed = false;
+                }
             });
+            */
 
-            angular.element(endPin).bind("mouseup", function () {
+
+
+
+
+            /*
+            angular.element(end.element).bind("mouseup", function () {
                 $log.log("end pin mouseup");
-                endPinDown = false;
+                end.pressed = false;
             });
+            */
         }
     }
 }]);

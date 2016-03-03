@@ -145,6 +145,7 @@
   width: 80%;
   min-width: 935px;
   height: 70%;
+  min-height: 425px;
   float: left;
   z-index: 7;
   background: white;
@@ -215,8 +216,8 @@
 }
 #dwelling #dwelling-filter-popup #dwelling-filter-popup-sliders h2 {
   display: block;
-  font-family: "Helvetica";
-  font-size: 25px;
+  font-family: "Helvetica Neu";
+  font-size: 27px;
   color: gray;
   text-align: center;
 }
@@ -250,14 +251,14 @@
   color: black;
 }
 #dwelling #dwelling-filter-popup #dwelling-filter-popup-data table tbody tr:hover {
-  background: #0D47A1;
+  background: #01579B;
   color: white;
 }
 #dwelling #dwelling-filter-popup #dwelling-filter-popup-data table tbody tr:nth-child(odd) {
   background: #FFF3E0;
 }
 #dwelling #dwelling-filter-popup #dwelling-filter-popup-data table tbody tr:nth-child(odd):hover {
-  background: #0D47A1;
+  background: #01579B;
 }
 #dwelling #dwelling-filter-popup #dwelling-filter-popup-data table tbody td {
   padding: 15px;
@@ -266,12 +267,31 @@
   font-weight: bold;
   text-align: center;
 }
+#dwelling #dwelling-filter-popup #dwelling-filter-popup-total {
+  padding-top: 10px;
+  font-family: "Verdana";
+  font-size: 16px;
+  text-transform: uppercase;
+  text-align: center;
+  color: gray;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+#dwelling #dwelling-filter-popup #dwelling-filter-popup-total .big {
+  font-family: "Helvetica";
+  font-size: 35px;
+  color: #2E7D32;
+}
 #dwelling .slider-control {
   position: relative;
   height: 60px;
   padding-bottom: 10px;
   box-sizing: border-box;
-  border: 1px solid black;
+  border: 1px solid transparent;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -297,18 +317,26 @@
   height: 15px;
   margin-bottom: 3px;
   text-align: center;
-  border: 1px solid blue;
+  font-family: "Tahoma";
+  font-size: 14px;
+  font-weight: bold;
+  color: #2E7D32;
 }
 #dwelling .slider-control .slider-picker .slider-picker-pin {
   display: inline-block;
   height: 30px;
   width: 30px;
+  box-sizing: border-box;
+  border-bottom: 3px solid #01579B;
   border-radius: 50%;
-  background: #0D47A1;
+  background: #0288D1;
+}
+#dwelling .slider-control .slider-picker .slider-picker-pin:hover {
+  background: #0277BD;
 }
 #dwelling .slider-control .slider-line {
   height: 2px;
-  margin-top: 35px;
+  margin-top: 33px;
   background: lightgray;
   border-top: 1px solid darkgray;
 }
