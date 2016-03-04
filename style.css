@@ -43,8 +43,8 @@ html, body {
 #dwelling #dwelling-svg polyline:hover {
     //stroke: green;
     //cursor: pointer;
-    //fill: rgba(245, 196, 61, 0.5);
-    fill: rgba(255, 50, 120, 0.5);
+    fill: rgba(245, 196, 61, 0.5);
+    //fill: rgba(255, 50, 120, 0.5);
 }
 
 .svg-queue-marker {

@@ -22,8 +22,8 @@
             <polyline ng-repeat="house in dwelling.houses.getAll()"
                       ng-show="currentHouse === undefined && currentQueue !== undefined && house.queueNumber === currentQueue.number"
                       ng-attr-points="{{ house.getCoords() }}"
-                      ng-click="selectHouse(house)"
-                      ng-mousemove="queueHouseIn(house)"
+                      ng-click="selectHouse(house.queueNumber, house.number)"
+                      ng-mousemove="houseMouseIn(house)"
                       ng-mouseleave="houseMouseOut(house)"
             />
         </svg>
