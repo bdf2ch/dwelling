@@ -37,15 +37,19 @@ html, body {
     //stroke: red;
     cursor: pointer;
     fill: rgba(30, 40, 50, 0.5);
-
 }
 
-#dwelling #dwelling-svg polyline:hover {
+#dwelling #dwelling-svg polyline.hovered {
+    fill: rgba(245, 196, 61, 0.5);
+}
+
+/*#dwelling #dwelling-svg polyline:hover {
     //stroke: green;
     //cursor: pointer;
     fill: rgba(245, 196, 61, 0.5);
     //fill: rgba(255, 50, 120, 0.5);
 }
+*/
 
 .svg-queue-marker {
     position: absolute;

@@ -16,24 +16,26 @@
                       ng-show="currentQueue === undefined"
                       ng-attr-points="{{ queue.getCoords() }}"
                       ng-click="selectQueue(queue.number)"
-                      ng-mousemove="queueMouseIn(queue)"
-                      ng-mouseleave="queueMouseOut(queue)"
+                      ng-mouseenter="queueMouseEnter(queue)"
+                      ng-mouseleave="queueMouseLeave(queue)"
+                      ng-class="{ 'hovered': queue.isHovered() === true }"
             />
             <polyline ng-repeat="house in dwelling.houses.getAll()"
                       ng-show="currentHouse === undefined && currentQueue !== undefined && house.queueNumber === currentQueue.number"
                       ng-attr-points="{{ house.getCoords() }}"
                       ng-click="selectHouse(house.queueNumber, house.number)"
-                      ng-mousemove="houseMouseIn(house)"
-                      ng-mouseleave="houseMouseOut(house)"
+                      ng-mouseenter="houseMouseEnter(house)"
+                      ng-mouseleave="houseMouseLeave(house)"
+                      ng-class="{ 'hovered': house.isHovered() === true }"
             />
         </svg>
         <div class="dwelling-marker"
              ng-repeat="marker in dwelling.markers.getAll()"
-             ng-show="marker.isVisible() === true"
+             ng-if="marker.isDisplayable() === true"
              ng-click="onClickMarker(marker)"
-             ng-mousemove="markerMouseIn(marker, $event)"
-             ng-mouseleave="markerMouseOut(marker, $event)"
-             ng-class="{ 'queue': marker.class === 'queue', 'flats': marker.class === 'flats', 'filter': marker.class === 'filter' }"
+             ng-mouseenter="markerMouseEnter(marker)"
+             ng-mouseleave="markerMouseLeave(marker)"
+             ng-class="{ 'queue': marker.class === 'queue', 'flats': marker.class === 'flats', 'filter': marker.class === 'filter', 'hidden': marker.isVisible() === false }"
              style="{{ marker.getCoords() }}">
                 <span class="marker-caption">{{ marker.caption }}</span>
                 <span class="marker-title">{{ marker.title }}</span>
@@ -55,13 +57,55 @@
                 <div id="header-right">
                     <table>
                         <thead>
-                            <th style="width: 10%">Дом</th>
-                            <th style="width: 15%">Подъезд</th>
-                            <th style="width: 10%">Этаж</th>
-                            <th style="width: 10%">№</th>
-                            <th style="width: 10%">Комнат</th>
-                            <th style="width: 25%">Площадь, м<sup>2</sup></th>
-                            <th style="width: 20%">Цена, р.</th>
+                            <th style="width: 10%">
+                                <span class="label" ng-click="order.setOrder('house', !order.descending)">
+                                    Дом
+                                    <span class="order" ng-if="order.current === 'house' && order.descending === true">&uarr;</span>
+                                    <span class="order" ng-if="order.current === 'house' && order.descending === false">&darr;</span>
+                                </span>
+                            </th>
+                            <th style="width: 15%">
+                                <span class="label" ng-click="order.setOrder('entrance', !order.descending)">
+                                    Подъезд
+                                    <span class="order" ng-if="order.current === 'entrance' && order.descending === true">&uarr;</span>
+                                    <span class="order" ng-if="order.current === 'entrance' && order.descending === false">&darr;</span>
+                                </span>
+                            </th>
+                            <th style="width: 10%">
+                                <span class="label" ng-click="order.setOrder('floor', !order.descending)">
+                                    Этаж
+                                    <span class="order" ng-if="order.current === 'floor' && order.descending === true">&uarr;</span>
+                                    <span class="order" ng-if="order.current === 'floor' && order.descending === false">&darr;</span>
+                                </span>
+                            </th>
+                            <th style="width: 10%">
+                                <span class="label" ng-click="order.setOrder('flatNumber', !order.descending)">
+                                    №
+                                    <span class="order" ng-if="order.current === 'flatNumber' && order.descending === true">&uarr;</span>
+                                    <span class="order" ng-if="order.current === 'flatNumber' && order.descending === false">&darr;</span>
+                                </span>
+                            </th>
+                            <th style="width: 10%">
+                                <span class="label" ng-click="order.setOrder('roomsCount', !order.descending)">
+                                    Комнат
+                                    <span class="order" ng-if="order.current === 'roomsCount' && order.descending === true">&uarr;</span>
+                                    <span class="order" ng-if="order.current === 'roomsCount' && order.descending === false">&darr;</span>
+                                </span>
+                            </th>
+                            <th style="width: 25%">
+                                <span class="label" ng-click="order.setOrder('area', !order.descending)">
+                                    Площадь
+                                    <span class="order" ng-if="order.current === 'area' && order.descending === true">&uarr;</span>
+                                    <span class="order" ng-if="order.current === 'area' && order.descending === false">&darr;</span>
+                                </span>
+                            </th>
+                            <th style="width: 20%">
+                                <span class="label" ng-click="order.setOrder('price', !order.descending)">
+                                    Цена, р.
+                                    <span class="order" ng-if="order.current === 'price' && order.descending === true">&uarr;</span>
+                                    <span class="order" ng-if="order.current === 'price' && order.descending === false">&darr;</span>
+                                </span>
+                            </th>
                         </thead>
                     </table>
                 </div>
@@ -79,7 +123,7 @@
             <div id="dwelling-filter-popup-data">
                 <table>
                     <tbody>
-                    <tr ng-repeat="flat in filtered = (dwelling.flats.getAll() | house:currentHouse.number | floor:filters.minFloor:filters.maxFloor | rooms:filters.minRoomsCount:filters.maxRoomsCount | area:filters.minArea:filters.maxArea)">
+                    <tr ng-repeat="flat in filtered = (dwelling.flats.getAll() | house:currentHouse.number | floor:filters.minFloor:filters.maxFloor | rooms:filters.minRoomsCount:filters.maxRoomsCount | area:filters.minArea:filters.maxArea | price:filters.minPrice:filters.maxPrice | orderBy:order.current:order.descending)">
                         <td style="width: 10%">{{ flat.houseNumber }}</td>
                         <td style="width: 15%">{{ flat.entrance }}</td>
                         <td style="width: 10%">{{ flat.floor }}</td>
