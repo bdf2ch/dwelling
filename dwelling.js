@@ -872,7 +872,7 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
 
         setOrder: function (field, desc) {
             if (field !== undefined) {
-                if (this.hasOwnProperty(field))
+            //    if (this.hasOwnProperty(field))
                     this.current = field;
             }
             if (desc !== undefined && desc.constructor === Boolean)
@@ -895,9 +895,9 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
 
 
     $scope.$watchCollection("dwelling.flats.getAll()", function (value) {
-        $log.log("flats = ", value);
+        //$log.log("flats = ", value);
         if (value.length > 0) {
-            $log.log("start, ", value.length);
+           // $log.log("start, ", value.length);
             var length = value.length;
             for (var i = 0; i < length; i++) {
                 $scope.filters.minFloor = value[i].floor < $scope.filters.minFloor ? value[i].floor : $scope.filters.minFloor;
@@ -1437,9 +1437,17 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                 }
             } else {
                 for (var i = parseInt(scope.minValueModel); i <= parseInt(scope.maxValueModel); i += parseInt(scope.step)) {
+                    var temp_val = 0;
+                    if (i === parseInt(scope.minValueModel))
+                        temp_val = parseInt(scope.minValueModel);
+                    if (i === parseInt(scope.maxValueModel))
+                        temp_val = parseInt(scope.maxValueModel);
+                    if (i >= parseInt(scope.minValueModel) && i <= parseInt(scope.maxValueModel))
+                        temp_val = i;
                     var step = {
                         start: stepX,
-                        end: (width - end.width - start.width) / (parseInt(scope.maxValueModel) / parseInt(scope.step)) + stepX
+                        end: (width - start.width - end.width) / (parseInt(scope.maxValueModel) / parseInt(scope.step)) + stepX,
+                        value: temp_val
                     };
                     steps.push(step);
                     stepX = step.end;
@@ -1447,7 +1455,7 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
             }
 
 
-            $log.log("step is float", isFloat(Number(scope.step)));
+            //$log.log("step is float", isFloat(Number(scope.step)));
             $log.log("step count = ", steps.length);
             $log.log("steps = ", steps);
 
@@ -1489,6 +1497,17 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                             "left": start.offsetLeft + (event.pageX - start.pageX) + "px"
                         });
                         start.pageX = event.pageX;
+                        //$log.log("start.offsetleft - (end.offsetLeft - width) = ", start.offsetLeft - (end.offsetLeft - end.width));
+
+                        /*
+                        if (start.offsetLeft - (end.offsetLeft - end.width) === -1) {
+                            $log.log("bingo");
+                            if (isFloat(Number(scope.step)) === true)
+                                scope.minValueModel = parseFloat((parseFloat(i / 10) + 0.1).toFixed(1));
+                            else
+                                scope.minValueModel = parseInt(scope.maxValueModel);
+                        }
+                        */
                     }
 
                     if ((event.pageX < start.pageX) && start.offsetLeft > 0) {
@@ -1506,7 +1525,8 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                             if (isFloat(Number(scope.step)) === true)
                                 scope.minValueModel = parseFloat((parseFloat(i / 10) + 0.1).toFixed(1));
                              else
-                                scope.minValueModel = i + 1;
+                                //scope.minValueModel = i;
+                                scope.minValueModel = step.value;
                             scope.$apply();
                         }
                     }
@@ -1523,7 +1543,6 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                         end.pageX = event.pageX;
                     }
 
-
                     if ((event.pageX < end.pageX) && end.offsetLeft > (start.offsetLeft + start.width)) {
                         angular.element(end.element).css({
                             "left": end.offsetLeft - (end.pageX - event.pageX) + "px"
@@ -1531,9 +1550,8 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                         end.pageX = event.pageX;
                     }
 
-
                     var stepsLength = steps.length;
-                    for (var i = 0; i < stepsLength; i++) {
+                    for (var i = 1; i < stepsLength; i++) {
                         var step = steps[i];
                         if (end.offsetLeft > step.start && end.offsetLeft < step.end) {
                             $log.log("i = ", i);
@@ -1541,7 +1559,8 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                             if (isFloat(Number(scope.step)) === true)
                                 scope.maxValueModel = parseFloat((parseFloat(i / 10) - parseFloat(scope.step)).toFixed(1));
                             else
-                                scope.maxValueModel = (i + 1) - parseInt(scope.step);
+                                //scope.maxValueModel = step.value;
+                                scope.maxValueModel = step.value;
                             scope.$apply();
                         }
                     }

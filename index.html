@@ -85,18 +85,18 @@
                                     <span class="order" ng-if="order.current === 'flatNumber' && order.descending === false">&darr;</span>
                                 </span>
                             </th>
-                            <th style="width: 10%">
+                            <th style="width: 15%">
                                 <span class="label" ng-click="order.setOrder('roomsCount', !order.descending)">
                                     Комнат
                                     <span class="order" ng-if="order.current === 'roomsCount' && order.descending === true">&uarr;</span>
                                     <span class="order" ng-if="order.current === 'roomsCount' && order.descending === false">&darr;</span>
                                 </span>
                             </th>
-                            <th style="width: 25%">
-                                <span class="label" ng-click="order.setOrder('area', !order.descending)">
+                            <th style="width: 20%">
+                                <span class="label" ng-click="order.setOrder('area.total', !order.descending)">
                                     Площадь
-                                    <span class="order" ng-if="order.current === 'area' && order.descending === true">&uarr;</span>
-                                    <span class="order" ng-if="order.current === 'area' && order.descending === false">&darr;</span>
+                                    <span class="order" ng-if="order.current === 'area.total' && order.descending === true">&uarr;</span>
+                                    <span class="order" ng-if="order.current === 'area.total' && order.descending === false">&darr;</span>
                                 </span>
                             </th>
                             <th style="width: 20%">
