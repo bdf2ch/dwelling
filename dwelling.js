@@ -346,6 +346,7 @@ var dwellingModule = angular.module("dwelling", [])
             var queues = [];
             var houses = [];
             var flats = [];
+            var flat = undefined;
 
             var service = {
 
@@ -390,6 +391,9 @@ var dwellingModule = angular.module("dwelling", [])
                 flats: {
                     getAll: function () {
                         return flats;
+                    },
+                    getCurrent: function () {
+                        return flat;
                     }
                 },
 
@@ -439,6 +443,20 @@ var dwellingModule = angular.module("dwelling", [])
                                 }
                             });
                     }
+                },
+
+                getFlatByNumber: function (flatNumber, callback) {
+                    if (flatNumber !== undefined) {
+                        var url = "http://i-mera.ru/estate/api/getFlatInfo/" + flatNumber;
+                        $http.post(url)
+                            .success(function (data) {
+                                if (data !== undefined) {
+                                    $log.log(data);
+                                    if (callback !== undefined)
+                                        callback(data);
+                                }
+                            });
+                    }
                 }
             };
 
@@ -449,6 +467,7 @@ var dwellingModule = angular.module("dwelling", [])
     })
     .run(function ($log, $dwelling) {
         $dwelling.getFlatsByComplexNumber(7);
+        $dwelling.getFlatByNumber(164239);
 
         $dwelling.set({
             background: "img/01.jpg"
@@ -824,6 +843,7 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
     $scope.filterPopup = false;
     $scope.currentQueue = undefined;
     $scope.currentHouse = undefined;
+    $scope.currentFlat = undefined;
     $scope.currentImgSrc = "";
     $scope.img = dwellingImg;
     $scope.imgIsLoading = false;
@@ -912,9 +932,9 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
                 $scope.filters.minAreaDefault = $scope.filters.minArea;
                 $scope.filters.maxArea = value[i].area.total > $scope.filters.maxArea ? parseInt(value[i].area.total) : $scope.filters.maxArea;
                 $scope.filters.maxAreaDefault = $scope.filters.maxArea;
-                $scope.filters.minPrice = parseFloat((value[i].price / 1000000).toFixed(1)) < $scope.filters.minPrice ? parseFloat((value[i].price / 1000000).toFixed(1)) : $scope.filters.minPrice;
+                $scope.filters.minPrice = parseFloat((value[i].price * 0.000001).toFixed(1)) < $scope.filters.minPrice ? parseFloat((value[i].price * 0.000001).toFixed(1)) : $scope.filters.minPrice;
                 $scope.filters.minPriceDefault = $scope.filters.minPrice;
-                $scope.filters.maxPrice = parseFloat((value[i].price / 1000000).toFixed(1)) > $scope.filters.maxPrice ? parseFloat((value[i].price / 1000000).toFixed(1)) : $scope.filters.maxPrice;
+                $scope.filters.maxPrice = parseFloat((value[i].price * 0.000001).toFixed(1)) > $scope.filters.maxPrice ? parseFloat((value[i].price * 0.000001).toFixed(1)) : $scope.filters.maxPrice;
                 $scope.filters.maxPriceDefault = $scope.filters.maxPrice;
 
                 var houses_length = $dwelling.houses.getAll().length;
@@ -1178,6 +1198,20 @@ dwellingModule.controller("DwellingController", ["$log", "$scope", "$dwelling", 
     };
 
 
+    $scope.selectFlat = function (flatId) {
+        $dwelling.getFlatByNumber(flatId, $scope.onSuccessSelectFlat);
+    };
+
+
+    $scope.onSuccessSelectFlat = function (data) {
+        if (data !== undefined) {
+            var flat = new Flat();
+            flat.fromJSON(data);
+            $scope.currentFlat = flat;
+        }
+    };
+
+
     $scope.onClickMarker = function (marker) {
         if (marker !== undefined) {
             switch (marker.class) {
@@ -1421,36 +1455,39 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                 pressed: false
             };
             var width = angular.element(element)[0].clientWidth;
-            //$log.log("width = ", width);
+            $log.log("width = ", width);
             //var step = isFloat(scope.step) ? parseFloat(scope.step) : parseInt(scope.step);
             var steps = [];
             var stepX = 0;
+            var leftPinX = 0;
+            var rightPinX = start.width;
 
             if (isFloat(Number(scope.step)) === true) {
                 for (var i = parseFloat(scope.minValueModel); i <= parseFloat(scope.maxValueModel) / parseFloat(scope.step); i += parseFloat(scope.step)) {
                     var step = {
-                        start: stepX,
-                        end: (width - end.width - start.width) / (parseFloat(scope.maxValueModel) / parseFloat(scope.step)) + stepX
+                        leftPinStartX: leftPinX,
+                        leftPinEndX: (width - end.width) / (parseFloat(scope.maxValueModel) / parseFloat(scope.step)) + leftPinX,
+                        rightPinStartX: rightPinX,
+                        rightPinEndX: (width - start.width) / (parseFloat(scope.maxValueModel) / parseFloat(scope.step)) + rightPinX,
+                        value: i.toFixed(1)
                     };
                     steps.push(step);
-                    stepX = step.end;
+                    leftPinX = step.leftPinEndX;
+                    rightPinX = step.rightPinEndX;
                 }
             } else {
+                $log.log("segment width = ", (width - (start.width + end.width)));
                 for (var i = parseInt(scope.minValueModel); i <= parseInt(scope.maxValueModel); i += parseInt(scope.step)) {
-                    var temp_val = 0;
-                    if (i === parseInt(scope.minValueModel))
-                        temp_val = parseInt(scope.minValueModel);
-                    if (i === parseInt(scope.maxValueModel))
-                        temp_val = parseInt(scope.maxValueModel);
-                    if (i >= parseInt(scope.minValueModel) && i <= parseInt(scope.maxValueModel))
-                        temp_val = i;
                     var step = {
-                        start: stepX,
-                        end: (width - start.width - end.width) / (parseInt(scope.maxValueModel) / parseInt(scope.step)) + stepX,
-                        value: temp_val
+                        leftPinStartX: leftPinX,
+                        leftPinEndX: (width - end.width) / (parseInt(scope.maxValueModel) / parseInt(scope.step)) + leftPinX,
+                        rightPinStartX: rightPinX,
+                        rightPinEndX: (width - start.width) / (parseInt(scope.maxValueModel) / parseInt(scope.step)) + rightPinX,
+                        value: i
                     };
                     steps.push(step);
-                    stepX = step.end;
+                    leftPinX = step.leftPinEndX;
+                    rightPinX = step.rightPinEndX;
                 }
             }
 
@@ -1492,36 +1529,64 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                     start.offsetLeft = angular.element(start.element).prop("offsetLeft");
                     end.offsetLeft = angular.element(end.element).prop("offsetLeft");
 
+                    /* Движение первого ползунка вправо */
                     if ((event.pageX > start.pageX) && start.offsetLeft < (end.offsetLeft - end.width)) {
                         angular.element(start.element).css({
                             "left": start.offsetLeft + (event.pageX - start.pageX) + "px"
                         });
                         start.pageX = event.pageX;
-                        //$log.log("start.offsetleft - (end.offsetLeft - width) = ", start.offsetLeft - (end.offsetLeft - end.width));
 
-                        /*
-                        if (start.offsetLeft - (end.offsetLeft - end.width) === -1) {
-                            $log.log("bingo");
-                            if (isFloat(Number(scope.step)) === true)
-                                scope.minValueModel = parseFloat((parseFloat(i / 10) + 0.1).toFixed(1));
-                            else
-                                scope.minValueModel = parseInt(scope.maxValueModel);
+
+                        var length = steps.length;
+                        for (var i = 0; i < length; i++) {
+                            var step = steps[i];
+                            if ((start.offsetLeft + start.width) > step.leftPinStartX && (start.offsetLeft + start.width) < step.leftPinEndX) {
+                                //$log.log("isFloat = ", isFloat(Number(scope.step)));
+                                $log.log("current step = ", i);
+                                if (isFloat(Number(scope.step)) === true)
+                                    scope.minValueModel = step.value;
+                                else
+                                //scope.minValueModel = i;
+                                    scope.minValueModel = step.value;
+                                scope.$apply();
+                            }
                         }
-                        */
                     }
 
+                    /* Движение первого ползунка влево */
                     if ((event.pageX < start.pageX) && start.offsetLeft > 0) {
                         angular.element(start.element).css({
                             "left": start.offsetLeft - (start.pageX - event.pageX) + "px"
                         });
                         start.pageX = event.pageX;
+
+
+                        var length = steps.length;
+                        for (var i = 0; i < length; i++) {
+                            var step = steps[i];
+                            if (start.offsetLeft > step.leftPinStartX && start.offsetLeft < step.leftPinEndX) {
+                                //$log.log("isFloat = ", isFloat(Number(scope.step)));
+                                $log.log("current step = ", steps[i]);
+                                if (isFloat(Number(scope.step)) === true)
+                                    scope.minValueModel = step.value
+                                else
+                                //scope.minValueModel = i;
+                                    scope.minValueModel = step.value;
+                                scope.$apply();
+                            }
+                        }
                     }
 
+                    /*
                     var stepsLength = steps.length;
                     for (var i = 0; i < stepsLength; i++) {
                         var step = steps[i];
+                        //var startPinCenter = start.offsetLeft + (start.width / 2);
+                        //if (startPinCenter > step.start && startPinCenter < step.end) {
+
                         if (start.offsetLeft > step.start && start.offsetLeft < step.end) {
-                            $log.log("isFloat = ", isFloat(Number(scope.step)));
+                            //$log.log("isFloat = ", isFloat(Number(scope.step)));
+                            $log.log("current step = ", i);
                             if (isFloat(Number(scope.step)) === true)
                                 scope.minValueModel = parseFloat((parseFloat(i / 10) + 0.1).toFixed(1));
                              else
@@ -1530,26 +1595,61 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                             scope.$apply();
                         }
                     }
+                    */
                 }
 
                 if (end.pressed === true) {
                     start.offsetLeft = angular.element(start.element).prop("offsetLeft");
                     end.offsetLeft = angular.element(end.element).prop("offsetLeft");
 
+                    /* Движение второго ползунка вправо */
                     if ((event.pageX > end.pageX) && end.offsetLeft < (width - end.width)) {
                         angular.element(end.element).css({
                             "left": end.offsetLeft + (event.pageX - end.pageX) + "px"
                         });
                         end.pageX = event.pageX;
+
+                        var stepsLength = steps.length;
+                        for (var i = 0; i < stepsLength; i++) {
+                            var step = steps[i];
+                            if (end.offsetLeft + end.width > step.rightPinStartX && end.offsetLeft + end.width < step.rightPinEndX) {
+                                $log.log("i = ", i);
+                                //$log.log("isFloat = ", isFloat(Number(scope.step)));
+                                if (isFloat(Number(scope.step)) === true)
+                                    scope.maxValueModel = step.value
+                                else
+                                //scope.maxValueModel = step.value;
+                                    scope.maxValueModel = step.value;
+                                scope.$apply();
+                            }
+                        }
                     }
 
+                    /* Движение второго ползунка влево */
                     if ((event.pageX < end.pageX) && end.offsetLeft > (start.offsetLeft + start.width)) {
                         angular.element(end.element).css({
                             "left": end.offsetLeft - (end.pageX - event.pageX) + "px"
                         });
                         end.pageX = event.pageX;
+
+                        var stepsLength = steps.length;
+                        for (var i = 0; i < stepsLength; i++) {
+                            var step = steps[i];
+                            if (end.offsetLeft > step.rightPinStartX && end.offsetLeft < step.rightPinEndX) {
+                                $log.log("i = ", i);
+                                $log.log("offset left = ", end.offsetLeft);
+                                //$log.log("isFloat = ", isFloat(Number(scope.step)));
+                                if (isFloat(Number(scope.step)) === true)
+                                    scope.maxValueModel = step.value;
+                                else
+                                //scope.maxValueModel = step.value;
+                                    scope.maxValueModel = step.value;
+                                scope.$apply();
+                            }
+                        }
                     }
 
+                    /*
                     var stepsLength = steps.length;
                     for (var i = 1; i < stepsLength; i++) {
                         var step = steps[i];
@@ -1564,12 +1664,13 @@ dwellingModule.directive("slider", ["$log", "$window", function ($log, $window) 
                             scope.$apply();
                         }
                     }
+                    */
 
                 }
             });
 
             angular.element(start.element).bind("mouseleave", function (event) {
-                $log.log("start pin mouse leave");
+                //$log.log("start pin mouse leave");
                 //start.pressed = false;
             });
 

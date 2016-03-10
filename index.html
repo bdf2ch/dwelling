@@ -52,7 +52,7 @@
 
         <div id="dwelling-filter-popup" ng-if="filterPopup === true">
             <div id="close-filter" class="dwelling-marker close-filter" ng-show="currentHouse === undefined" ng-click="closeFilter()"></div>
-            <div id="dwelling-filter-popup-header">
+            <div id="dwelling-filter-popup-header" ng-if="currentFlat === undefined">
                 <div id="header-left"><span ng-click="closeFilter()" ng-show="currentHouse === undefined">Назад</span></div>
                 <div id="header-right">
                     <table>
@@ -110,7 +110,7 @@
                     </table>
                 </div>
             </div>
-            <div id="dwelling-filter-popup-sliders">
+            <div id="dwelling-filter-popup-sliders" ng-if="currentFlat === undefined">
                 <h2>Подбор по параметрам</h2>
                 <slider min-value="0" min-value-model="filters.minFloor" max-value-model="filters.maxFloor" max-value="5" step="1" caption="этаж"></slider>
                 <slider min-value="0" min-value-model="filters.minRoomsCount" max-value-model="filters.maxRoomsCount" max-value="5" step="1" caption="комнат"></slider>
@@ -120,10 +120,10 @@
                     Найдено <span class="big">{{ filtered.length }}</span> квартир<span ng-show="">ы</span>
                 </div>
             </div>
-            <div id="dwelling-filter-popup-data">
+            <div id="dwelling-filter-popup-data" ng-if="currentFlat === undefined">
                 <table>
                     <tbody>
-                    <tr ng-repeat="flat in filtered = (dwelling.flats.getAll() | house:currentHouse.number | floor:filters.minFloor:filters.maxFloor | rooms:filters.minRoomsCount:filters.maxRoomsCount | area:filters.minArea:filters.maxArea | price:filters.minPrice:filters.maxPrice | orderBy:order.current:order.descending)">
+                    <tr ng-repeat="flat in filtered = (dwelling.flats.getAll() | house:currentHouse.number | floor:filters.minFloor:filters.maxFloor | rooms:filters.minRoomsCount:filters.maxRoomsCount | area:filters.minArea:filters.maxArea | price:filters.minPrice:filters.maxPrice | orderBy:order.current:order.descending)" ng-click="selectFlat(flat.id)">
                         <td style="width: 10%">{{ flat.houseNumber }}</td>
                         <td style="width: 15%">{{ flat.entrance }}</td>
                         <td style="width: 10%">{{ flat.floor }}</td>
@@ -137,6 +137,9 @@
                     </tr>
                     </tbody>
                 </table>
+            </div>
+            <div id="dwelling-flat-info" ng-if="currentFlat !== undefined">
+                квартира
             </div>
         </div>
     </div>
